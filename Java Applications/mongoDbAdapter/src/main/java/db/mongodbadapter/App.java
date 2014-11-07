@@ -11,10 +11,5 @@ public class App
         //the directory the new json will be moved into after they are inserted
         final String backup_folder_path = "/usr/lib/twitter-project/" + args[1] + "/new/";
         
-
-        
-        do{
-            String new_dir.list().length
-        }while ();
     }
 }
