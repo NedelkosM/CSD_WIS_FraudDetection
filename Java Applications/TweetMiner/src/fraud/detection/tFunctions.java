@@ -47,9 +47,10 @@ public class tFunctions {
             try {
                     String encodedConsumerKey = URLEncoder.encode(consumerKey, "UTF-8");
                     String encodedConsumerSecret = URLEncoder.encode(consumerSecret, "UTF-8");
-
                     String fullKey = encodedConsumerKey + ":" + encodedConsumerSecret;
-                    return fullKey;  
+                    String encodedBytes;
+                    encodedBytes = Base64.encode(fullKey.getBytes());
+                    return encodedBytes;  
             }
             catch (UnsupportedEncodingException e) {
                     return new String();
@@ -68,7 +69,7 @@ public class tFunctions {
                     connection.setRequestMethod("POST"); 
                     connection.setRequestProperty("Host", "api.twitter.com");
                     connection.setRequestProperty("User-Agent", "Fraud Detector 2014");
-                    connection.setRequestProperty("Authorization", "Bearer " + encodedCredentials);
+                    connection.setRequestProperty("Authorization", "Basic " + encodedCredentials);
                     connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"); 
                     connection.setRequestProperty("Content-Length", "29");
                     connection.setRequestProperty("Accept-Encoding", "gzip");
@@ -76,8 +77,7 @@ public class tFunctions {
                     
                     writeRequest(connection, "grant_type=client_credentials");
                     String response = readResponse(connection);
-                    System.out.println("Server Response: "+response);
-                    // Parse the JSON response into a JSON mapped object to fetch fields from.
+                    
                     JSONObject obj = (JSONObject)JSONValue.parse(response);
                     if (obj != null) {
                             String tokenType = (String)obj.get("token_type");
@@ -101,6 +101,7 @@ public class tFunctions {
 	HttpsURLConnection connection = null;
 				
 	try {
+            // this shit does not work.. bring the coffee!
 		URL url = new URL(endPointUrl); 
 		connection = (HttpsURLConnection) url.openConnection();           
 		connection.setDoOutput(true);
@@ -110,10 +111,11 @@ public class tFunctions {
 		connection.setRequestProperty("User-Agent", "Fraud Detector 2014");
 		connection.setRequestProperty("Authorization", "Bearer " + bearerToken);
 		connection.setUseCaches(false);
-			
-			
+                		
 		// Parse the JSON response into a JSON mapped object to fetch fields from.
-		JSONArray obj = (JSONArray)JSONValue.parse(readResponse(connection));
+                String result = readResponse(connection);
+                System.out.println("Trends result: "+result);
+		JSONArray obj = (JSONArray)JSONValue.parse(result);
 			
 		if (obj != null) {
 			String tweet = ((JSONObject)obj.get(0)).get("text").toString();
@@ -145,18 +147,18 @@ public class tFunctions {
     }
 	
 	
-// Reads a response for a given connection and returns it as a string.
-private static String readResponse(HttpsURLConnection connection) {
-	try {
-		StringBuilder str = new StringBuilder();
-			
-		BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-		String line = "";
-		while((line = br.readLine()) != null) {
-			str.append(line).append(System.getProperty("line.separator"));
-		}
-		return str.toString();
-	}
-	catch (IOException e) { return new String(); }
-}
+    // Reads a response for a given connection and returns it as a string.
+    private static String readResponse(HttpsURLConnection connection) {
+            try {
+                    StringBuilder str = new StringBuilder();
+
+                    BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    String line = "";
+                    while((line = br.readLine()) != null) {
+                            str.append(line).append(System.getProperty("line.separator"));
+                    }
+                    return str.toString();
+            }
+            catch (IOException e) { return new String(); }
+    }
 }

@@ -15,12 +15,8 @@ public class FraudDetection {
      * @param args the command line arguments
      */
     public static void main(String[] args) {  
-        try {
-            System.out.println(requestBearerToken("https://api.twitter.com/oauth2/token"));
-        } catch (IOException ex) {
-            Logger.getLogger(FraudDetection.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        try {
+        updateBearerToken();
+        try{
             System.out.println(fetchTrends("https://api.twitter.com/1.1/trends/available.json"));
         } catch (IOException ex) {
             Logger.getLogger(FraudDetection.class.getName()).log(Level.SEVERE, null, ex);
