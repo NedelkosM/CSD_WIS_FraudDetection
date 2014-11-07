@@ -1,10 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package fraud.detection;
+
+import static fraud.detection.tFunctions.*;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -15,8 +14,17 @@ public class FraudDetection {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
-        // TODO code application logic here
+    public static void main(String[] args) {  
+        try {
+            System.out.println(requestBearerToken("https://api.twitter.com/oauth2/token"));
+        } catch (IOException ex) {
+            Logger.getLogger(FraudDetection.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            System.out.println(fetchTrends("https://api.twitter.com/1.1/trends/available.json"));
+        } catch (IOException ex) {
+            Logger.getLogger(FraudDetection.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
 }
