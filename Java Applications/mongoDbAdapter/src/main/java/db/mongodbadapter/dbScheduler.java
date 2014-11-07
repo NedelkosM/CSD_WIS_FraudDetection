@@ -19,7 +19,7 @@ public class dbScheduler {
     *************************************************************/
     
     //scheduler to run the routine for fixed period of time
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService scheduler;
     //The directory containing the new json files that need to be inserted in the db
     private final File new_dir;
     //the directory the new json will be moved into after they are inserted
@@ -46,6 +46,7 @@ public class dbScheduler {
         new_dir = new File(new_directory_path);
         backup = new File(backup_directory_path);
         filter = new JsonFilter();
+        scheduler = Executors.newScheduledThreadPool(1);
     }
     
     /**

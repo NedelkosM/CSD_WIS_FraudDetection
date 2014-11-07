@@ -13,4 +13,9 @@ public class JsonFilter implements FileFilter {
         return pathname.toString().endsWith(".json");
     }
     
+    public String getDescription()
+    {
+        return "Json files";
+    }
+    
 }
