@@ -1,8 +1,3 @@
-/*
- * Twitter 4j library developed by Yusuke Yamamoto
- *
- */
-
 package fraud.detection;
 
 import java.awt.Desktop;
@@ -27,18 +22,36 @@ import twitter4j.auth.OAuth2Token;
 import twitter4j.auth.RequestToken;
 import twitter4j.conf.ConfigurationBuilder;
 import twitter4j.json.DataObjectFactory;
-
+/**
+ * @author Miltos Nedelkos, nedelkosm at gmail com
+ * gihub dot com/nedelkosm
+ * nedelkos dot me
+ * 
+ * tFunctions class.
+ * Implements all functions that are needed for twitter API calls.
+ */
 public final class tFunctions {
+    /**
+     * Configuration Builder for twitter connection. Used in both App-Only and User authentication.
+     */
     private static ConfigurationBuilder builder;
+    /**
+     * Twitter object used for twitter connections. Used in both App-Only and User authentication and tFunctions. Must be unique and accessible to other classes.
+     */
     public static Twitter twitter;
+    /**
+     * Twitter object used for twitter streaming API connections. Must be unique and accessible to other classes.
+     */
     public static TwitterStream twitterStream;
-    
+    /**
+     * Authendicates the application and creates an OAuth2Token.
+     * @throws Throws exception when a connection to twitter cannot be made or authendication was not successful.
+     */
     public static void AppAuth() throws TwitterException, Exception{
         builder = new ConfigurationBuilder();
         builder.setApplicationOnlyAuthEnabled(true);
         builder.setJSONStoreEnabled(true);
-        
-        builder.setOAuthConsumerKey("SJI7mwsTho3A4YzGpqtjIYOap").setOAuthConsumerSecret("FVqF7cYVY6kXhLSJgdhQq9fTw5S04uzaW8wNjK5K6ZHxT3oSE5");
+        builder.setOAuthConsumerKey("consumerkey").setOAuthConsumerSecret("comsumerkeysecret");
         twitter = new TwitterFactory(builder.build()).getInstance();
         // exercise & verify
         OAuth2Token token = twitter.getOAuth2Token();
@@ -49,29 +62,42 @@ public final class tFunctions {
         assertNotNull(searchTweetsRateLimit);
         assertEquals(searchTweetsRateLimit.getLimit(), 450);
     }
-  
+    /**
+     * Authenticates the application and creates an OAuthToken. If access token is not already saved, it will ask user for authentication and save the token at twitter4j.properties.
+     * @param args The same parameters from Main. Use args[1] for consumerKey and args[2] for consumerKeySecret.
+     */
     public static void UserAuth(String[] args){
+        /**
+        * Properties file that saves tokens and other configuration settings.
+        * Name of the file kept original to honor twitter4j developer, Yusuke Yamamoto, 2009
+        */
         File file = new File("twitter4j.properties");
         Properties prop = new Properties();
         InputStream is = null;
         OutputStream os = null;
         try {
+            // check if properties file exists
             if (file.exists()) {
                 is = new FileInputStream(file);
                 prop.load(is);
             }
+            // if enough arguements are given to main. Will overwrite the properties file
             if (args.length < 3) {
+                // if the arguements were not enough and the properties file was not found
                 if (null == prop.getProperty("oauth.consumerKey")
                         && null == prop.getProperty("oauth.consumerSecret")) {
                     // consumer key/secret are not set in twitter4j.properties
                     System.out.println(
                             "Usage: java twitter4j.examples.oauth.GetAccessToken [consumer key] [consumer secret]");
+                    // Exit with failure
                     System.exit(-1);
                 }
             } else {
+                // Get settings from main
                 prop.setProperty("oauth.consumerKey", args[1]);
                 prop.setProperty("oauth.consumerSecret", args[2]);
                 os = new FileOutputStream("twitter4j.properties");
+                // Store token to properties
                 prop.store(os, "twitter4j.properties");
             }
         } catch (IOException ioe) {
@@ -92,7 +118,9 @@ public final class tFunctions {
             }
         }
         try {
-            twitter = new TwitterFactory().getInstance();
+            builder = new ConfigurationBuilder();
+            builder.setJSONStoreEnabled(true);
+            twitter = new TwitterFactory(builder.build()).getInstance();
             RequestToken requestToken;
             AccessToken accessToken = null;
             if(!prop.containsKey("oauth.accessToken")){
@@ -166,6 +194,10 @@ public final class tFunctions {
         }
     }
     
+    /**
+     * Calls twitter API to retrieve top world trends.
+     * @return Will return top 10 trends in a single string formated in JSON. Will return null if unsuccessful.
+     */
     public static String getWorldTrends(){
         /* All available trends
         ResponseList<Location> locations = null;

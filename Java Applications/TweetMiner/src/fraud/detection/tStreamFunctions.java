@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package fraud.detection;
 
 import static fraud.detection.FraudDetection.relPath;
@@ -19,16 +13,35 @@ import twitter4j.Trends;
 import twitter4j.TwitterException;
 import twitter4j.json.DataObjectFactory;
 import static twitter4j.json.DataObjectFactory.createTrends;
-import java.lang.System;
-
 /**
- *
- * @author Miltos
+ * @author Miltos Nedelkos, nedelkosm at gmail com
+ * gihub dot com/nedelkosm
+ * nedelkos dot me
+ * 
+ * tStreamFunctions class.
+ * Implements all functions that are needed for twitter Streaming API calls.
  */
 public class tStreamFunctions{
+    /**
+     * Trends array. Used to filter which tweets contain a popular hashtag.
+     */
     static String[] trends;
+    /**
+     * Counts the number of tweets recored since the program started.
+     */
     static int totalTweets = 0;
+    /**
+     * Counts the number of tweets recored between intervals.
+     */
+    static int tweetsPerRun = 0;
+    /**
+     * Counts the number of 5min iterations.
+     */
     static int itterations;
+    /**
+     * Updates trends array, which is used to filter which tweets will be saved to file. Must be called before streaming listener is initialized.
+     * @param newTrends Top 10 Twitter trends. In JSON form.
+     */
     private static void updateTrends(String newTrends){
         trends = new String[10];
         try {
@@ -43,6 +56,9 @@ public class tStreamFunctions{
             Logger.getLogger(tStreamFunctions.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    /**
+     * Initializes the streaming API listeners. Will parse all incoming tweets and write to file all tweets that use a hashtag from the top trends.
+     */
     public static void startStream(String newTrends, int itteration){
         if(newTrends == null) return;
         updateTrends(newTrends);
@@ -51,12 +67,13 @@ public class tStreamFunctions{
             @Override
             public void onStatus(Status status) {
                 for(int i=0;i<10;i++){
-                    if(status.getText().contains(trends[i]))
-                    System.out.println("@" + status.getUser().getScreenName() + " - " + status.getText());
-                    
-                    String json = DataObjectFactory.getRawJSON(status);
-                    String filename = relPath+"\\Trends"+(itterations-1)+"\\Tweet"+(totalTweets++)+System.currentTimeMillis()+".json";
-                    Miner.writeFile(filename, json);
+                    if(status.getText().contains(trends[i])){
+                        //System.out.println("@" + status.getUser().getScreenName() + " - " + status.getText());
+                        String json = DataObjectFactory.getRawJSON(status);
+                        String filename = relPath+"\\Trends"+(itterations-1)+"\\Tweet"+(tweetsPerRun++)+"-"+System.currentTimeMillis()+".json";
+                        totalTweets++;
+                        Miner.writeFile(filename, json);
+                    }
                 }
             }
 
@@ -88,9 +105,17 @@ public class tStreamFunctions{
         twitterStream.addListener(listener);
         twitterStream.sample();
     }
+    
+    /**
+     * Stops listening to streaming API and reports results for the last 5 minutes.
+     */
     public static void stopStream(){
         if(twitterStream!=null){
             twitterStream.cleanUp();
+            System.out.println("Tweets for last trend : "+tweetsPerRun);
+            System.out.println("Total Tweets : "+totalTweets);
+            // Reset tweets counter
+            tweetsPerRun = 0;
         }
     }
 }
