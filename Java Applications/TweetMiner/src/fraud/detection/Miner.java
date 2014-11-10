@@ -4,7 +4,10 @@
  */
 package fraud.detection;
 
-import com.sun.corba.se.impl.protocol.giopmsgheaders.Message;
+import static fraud.detection.FraudDetection.relPath;
+import static fraud.detection.tStreamFunctions.startStream;
+import static fraud.detection.tStreamFunctions.stopStream;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -12,14 +15,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Miner implements Runnable{
-    String relPath = "";
+    String trends;
     int totalFiles = 0;
     int successfulFiles = 0;
     int targetFiles = 0;
     
-    public Miner(int target, String relativePath ){
+    public Miner(int target){
         targetFiles = target;
-        relPath = relativePath;
         run();
     }
     public void run(){
@@ -28,12 +30,14 @@ public class Miner implements Runnable{
             if(newFile!=null){
                 System.out.println("File "+newFile+" created.");
                 successfulFiles++;
+                listenTrends();
             } else {
                 System.out.println("Error : File not created.");
             }
             try {
-                int seconds = 5;
+                int seconds = 300;
                 Thread.sleep(seconds * 1000);
+                stopStream();
             } catch(InterruptedException ex) {
                 Thread.currentThread().interrupt();
             }
@@ -41,27 +45,35 @@ public class Miner implements Runnable{
     }
     private String getTrends(){
         String filename = null;
-        try {
-            tFunctions.AppAuth();
-        } catch (Exception ex) {
-            Logger.getLogger(Miner.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
-        String trends = tFunctions.getWorldTrends();
+        trends = tFunctions.getWorldTrends();
+        System.out.println("Trends: "+trends);
         if(trends == null){
             return null;
         }
+        filename = relPath+"\\Trends"+successfulFiles+"\\Trends"+(totalFiles++)+".json";
+        writeFile(filename,trends);
+        
+        return filename;
+    }
+    public void listenTrends(){
+        if(trends!=null){
+            startStream(trends,successfulFiles);
+        }
+    }
+    public static void writeFile(String filename, String content){
         FileWriter outFile = null;
         try {
-            filename = relPath+"Trends"+(totalFiles++)+".json";
+            File myfile = new File(filename);
+            if(!myfile.getParentFile().exists()){
+                myfile.getParentFile().mkdir();
+            }
             outFile = new FileWriter(filename);
         } catch (IOException ex) {
             Logger.getLogger(Miner.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
+            return;
         }
         try (PrintWriter out = new PrintWriter(outFile)) {
-            out.print(trends);
+            out.print(content);
         }
-        return filename;
     }
 }
