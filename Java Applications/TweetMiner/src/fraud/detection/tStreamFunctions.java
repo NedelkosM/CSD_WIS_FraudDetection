@@ -2,6 +2,7 @@ package fraud.detection;
 
 import static fraud.detection.FraudDetection.relPath;
 import static fraud.detection.tFunctions.twitterStream;
+import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import twitter4j.StallWarning;
@@ -70,7 +71,7 @@ public class tStreamFunctions{
                     if(status.getText().contains(trends[i])){
                         //System.out.println("@" + status.getUser().getScreenName() + " - " + status.getText());
                         String json = DataObjectFactory.getRawJSON(status);
-                        String filename = relPath+"\\Trends"+(itterations-1)+"\\Tweet"+(tweetsPerRun++)+"-"+System.currentTimeMillis()+".json";
+                        String filename = relPath+File.separator+"Trends"+(itterations-1)+File.separator+"Tweet"+(tweetsPerRun++)+"-"+System.currentTimeMillis()+".json";
                         totalTweets++;
                         Miner.writeFile(filename, json);
                     }

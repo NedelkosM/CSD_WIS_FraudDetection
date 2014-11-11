@@ -77,7 +77,7 @@ public class Miner implements Runnable{
         if(trends == null){
             return null;
         }
-        filename = relPath+"\\Trends"+successfulFiles+"\\Trends"+(totalFiles++)+".json";
+        filename = relPath+File.separator+"Trends"+successfulFiles+File.separator+"Trends"+(totalFiles++)+".json";
         writeFile(filename,trends);
         
         return filename;

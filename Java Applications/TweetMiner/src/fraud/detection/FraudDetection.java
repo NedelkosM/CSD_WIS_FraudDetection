@@ -13,7 +13,7 @@ public class FraudDetection {
     /**
      * Relative path in which the files will be shared. Slash at the end is not needed.
      */
-    public static String relPath = "\\TweetMiner";
+    public static String relPath = File.separator+"TweetMiner";
     
     /**
      * Main class. Will parse parameters and initialize the Miner for a 3-day period.
@@ -23,7 +23,7 @@ public class FraudDetection {
         if(args.length > 0){
             relPath = args[0];
         }
-        File myfile = new File(relPath+"\\temp.txt");
+        File myfile = new File(relPath+File.separator+"temp.txt");
         if(!myfile.getParentFile().exists()){
             myfile.getParentFile().mkdir();
         }
