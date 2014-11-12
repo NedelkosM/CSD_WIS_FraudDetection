@@ -38,7 +38,7 @@ public class tStreamFunctions{
     /**
      * Counts the number of 5min iterations.
      */
-    static int itterations;
+    static int iterations;
     /**
      * Updates trends array, which is used to filter which tweets will be saved to file. Must be called before streaming listener is initialized.
      * @param newTrends Top 10 Twitter trends. In JSON form.
@@ -59,11 +59,13 @@ public class tStreamFunctions{
     }
     /**
      * Initializes the streaming API listeners. Will parse all incoming tweets and write to file all tweets that use a hashtag from the top trends.
+     * @param newTrends Updates top trends
+     * @param iteration Counts the number of iterations since the program started. Used to determine in which folder the tweets will be written.
      */
-    public static void startStream(String newTrends, int itteration){
+    public static void startStream(String newTrends, int iteration){
         if(newTrends == null) return;
         updateTrends(newTrends);
-        itterations = itteration;
+        iterations = iteration;
         StatusListener listener = new StatusListener() {
             @Override
             public void onStatus(Status status) {
@@ -71,7 +73,7 @@ public class tStreamFunctions{
                     if(status.getText().contains(trends[i])){
                         //System.out.println("@" + status.getUser().getScreenName() + " - " + status.getText());
                         String json = DataObjectFactory.getRawJSON(status);
-                        String filename = relPath+File.separator+"Trends"+(itterations-1)+File.separator+"Tweet"+(tweetsPerRun++)+"-"+System.currentTimeMillis()+".json";
+                        String filename = relPath+File.separator+"Trends"+(iterations-1)+File.separator+"Tweet"+(tweetsPerRun++)+"-"+System.currentTimeMillis()+".json";
                         totalTweets++;
                         Miner.writeFile(filename, json);
                     }

@@ -28,7 +28,6 @@ public class FraudDetection {
             myfile.getParentFile().mkdir();
         }
         tFunctions.UserAuth(args);
-        new Miner(864);  // This amounts to a total of 3 days for 5-minute itterations.
-        return;
+        Miner miner = new Miner(864); // This amounts to a total of 3 days for 5-minute itterations.
     }
 }
