@@ -51,13 +51,17 @@ public class tStreamFunctions{
             Trends tr = createTrends(newTrends);
             Trend[] trendsObj;
             trendsObj = tr.getTrends();
-            for(Trend t:trendsObj){
+            TimedTrend[] tempTTrends = new TimedTrend[trendsObj.length];
+            for(int i=0;i<trendsObj.length;i++){
+                tempTTrends[i] = new TimedTrend(trendsObj[i]);
+            }
+            
+            for(TimedTrend t:tempTTrends){
                 boolean placed = false;
                 for (int i=0;i<trends.size();i++){
-                    Trend temp = (Trend) trends.get(i);
-                    if(temp.getName().equals(t.getName())){
-                        trends.remove(i);
-                        trends.add(t);
+                    TimedTrend temp = (TimedTrend) trends.get(i);
+                    if(temp.getTrend().getName().equals(t.getTrend().getName())){
+                        t.refresh();
                         placed = true;
                         break;
                     }
@@ -66,9 +70,11 @@ public class tStreamFunctions{
                     trends.add(t);
                 }
             }
-            for(int i=0;i<trends.size();i++){
-                // calculate time
-                // remove if time > 2h
+            for(int i =0;i<trends.size();i++){
+                TimedTrend t = (TimedTrend) trends.get(i);
+                if(t.expired(120)){
+                    trends.remove(i);
+                }
             }
         } catch (TwitterException ex) {
             Logger.getLogger(tStreamFunctions.class.getName()).log(Level.SEVERE, null, ex);
@@ -87,7 +93,8 @@ public class tStreamFunctions{
             @Override
             public void onStatus(Status status) {
                 for(int i=0;i<trends.size();i++){
-                    Trend tempTrend = (Trend) trends.get(i);
+                    TimedTrend tt = (TimedTrend) trends.get(i);
+                    Trend tempTrend = tt.getTrend();
                     String trendName = tempTrend.getName();
                     if(status.getText().contains(trendName)){
                         //System.out.println("@" + status.getUser().getScreenName() + " - " + status.getText());
