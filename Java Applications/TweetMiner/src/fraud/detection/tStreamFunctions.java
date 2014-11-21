@@ -3,6 +3,8 @@ package fraud.detection;
 import static fraud.detection.FraudDetection.relPath;
 import static fraud.detection.tFunctions.twitterStream;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import twitter4j.StallWarning;
@@ -26,7 +28,7 @@ public class tStreamFunctions{
     /**
      * Trends array. Used to filter which tweets contain a popular hashtag.
      */
-    static String[] trends;
+    static ArrayList trends;
     /**
      * Counts the number of tweets recored since the program started.
      */
@@ -44,14 +46,29 @@ public class tStreamFunctions{
      * @param newTrends Top 10 Twitter trends. In JSON form.
      */
     private static void updateTrends(String newTrends){
-        trends = new String[10];
+        trends = new ArrayList<>();
         try {
             Trends tr = createTrends(newTrends);
             Trend[] trendsObj;
             trendsObj = tr.getTrends();
-            int count = 0;
             for(Trend t:trendsObj){
-                trends[count++] = t.getName();
+                boolean placed = false;
+                for (int i=0;i<trends.size();i++){
+                    Trend temp = (Trend) trends.get(i);
+                    if(temp.getName().equals(t.getName())){
+                        trends.remove(i);
+                        trends.add(t);
+                        placed = true;
+                        break;
+                    }
+                }
+                if(!placed){
+                    trends.add(t);
+                }
+            }
+            for(int i=0;i<trends.size();i++){
+                // calculate time
+                // remove if time > 2h
             }
         } catch (TwitterException ex) {
             Logger.getLogger(tStreamFunctions.class.getName()).log(Level.SEVERE, null, ex);
@@ -69,8 +86,10 @@ public class tStreamFunctions{
         StatusListener listener = new StatusListener() {
             @Override
             public void onStatus(Status status) {
-                for(int i=0;i<10;i++){
-                    if(status.getText().contains(trends[i])){
+                for(int i=0;i<trends.size();i++){
+                    Trend tempTrend = (Trend) trends.get(i);
+                    String trendName = tempTrend.getName();
+                    if(status.getText().contains(trendName)){
                         //System.out.println("@" + status.getUser().getScreenName() + " - " + status.getText());
                         String json = DataObjectFactory.getRawJSON(status);
                         String filename = relPath+File.separator+"Trends"+(iterations-1)+File.separator+"Tweet"+(tweetsPerRun++)+"-"+System.currentTimeMillis()+".json";
