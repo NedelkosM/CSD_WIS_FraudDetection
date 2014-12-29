@@ -1,4 +1,4 @@
-package db.mongodbadapter;
+package twitterfrauddetection;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

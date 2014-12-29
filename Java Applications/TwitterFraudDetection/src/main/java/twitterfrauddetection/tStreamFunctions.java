@@ -1,7 +1,7 @@
-package fraud.detection;
+package twitterfrauddetection;
 
-import static fraud.detection.FraudDetection.relPath;
-import static fraud.detection.tFunctions.twitterStream;
+import static twitterfrauddetection.tFunctions.twitterStream;
+import static twitterfrauddetection.App.relPath;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -99,10 +99,10 @@ public class tStreamFunctions{
                     if(status.getText().contains(trendName)){
                         //System.out.println("@" + status.getUser().getScreenName() + " - " + status.getText());
                         String json = DataObjectFactory.getRawJSON(status);
-                        System.out.println(status);
+                        dbAdapter.getInstance().insertTweet(status);
                         String filename = relPath+File.separator+"Trends"+(iterations-1)+File.separator+"Tweet"+(tweetsPerRun++)+"-"+System.currentTimeMillis()+".json";
                         totalTweets++;
-                        Miner.writeFile(filename, json);
+                        //Miner.writeFile(filename, json);
                     }
                 }
             }
