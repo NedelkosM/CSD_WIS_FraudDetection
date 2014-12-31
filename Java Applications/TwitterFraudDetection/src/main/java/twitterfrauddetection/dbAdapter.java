@@ -8,20 +8,11 @@ package twitterfrauddetection;
 
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.BulkWriteOperation;
-import com.mongodb.BulkWriteResult;
-import com.mongodb.Cursor;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
-import com.mongodb.MongoCredential;
-import com.mongodb.ParallelScanOptions;
-import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 import twitter4j.Status;
 import twitter4j.Trend;
 import twitter4j.Trends;
@@ -41,8 +32,11 @@ public class dbAdapter {
     
     private MongoClient mongoClient;
     private DB db;
-    DBCollection TrendsColl;
-    DBCollection TweetsColl;
+    private DBCollection TrendsColl;
+    private DBCollection TweetsColl;
+    private BasicDBObject status_json;
+    private BasicDBObject trends_names;
+    private BasicDBObject trends_json;
 
     
     private dbAdapter() {  
@@ -76,13 +70,18 @@ public class dbAdapter {
     {
         mongoClient.setWriteConcern(WriteConcern.JOURNALED);
         
-        BasicDBObject trends_names = new BasicDBObject();
-        BasicDBObject trends_json = new BasicDBObject();
+        trends_names = new BasicDBObject();
+        trends_json = new BasicDBObject();
         for(Trend t : trends.getTrends())
         {
             String field = trendID + trendNum;
             trends_names.append(field, t.getName());
             trendNum++;
+            
+            if(trendNum%50 == 0)
+            {
+                System.gc();
+            }
         }
         trends_json.append("trends", trends_names);
         trends_json.append("as_of", trends.getAsOf());
@@ -95,7 +94,7 @@ public class dbAdapter {
     {
         mongoClient.setWriteConcern(WriteConcern.JOURNALED);
         
-        BasicDBObject status_json = new BasicDBObject();
+        status_json = new BasicDBObject();
         
         status_json.append("ID", status.getId());
         status_json.append("Text", status.getText());
