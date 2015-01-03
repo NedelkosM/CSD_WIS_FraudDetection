@@ -10,6 +10,7 @@ package twitterfrauddetection;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
 import java.net.UnknownHostException;
@@ -27,7 +28,7 @@ public class dbAdapter {
     private final int port  = 27017;
     private final String databaseName  = "twitter";
     private String trendID = "trend";
-    private int trendNum = 1;
+    private int trendNum = 1320;
     
     
     private MongoClient mongoClient;
@@ -51,6 +52,10 @@ public class dbAdapter {
         private static final dbAdapter INSTANCE = new dbAdapter();
     }
     
+    /**
+     * Create connection with the database and the collections
+     * @throws UnknownHostException 
+     */
     public void initialize() throws UnknownHostException
     {
        this.mongoClient = new MongoClient(host, port);
@@ -61,11 +66,19 @@ public class dbAdapter {
        TweetsColl = db.getCollection("tweets");
     }
     
+    /**
+     * Close the connections.
+     */
     public void closeConnections()
     {
         this.mongoClient.close();
     }
     
+    /**
+     * Creates a BasicDBObject for this trend and inserts it into the Trends 
+     * collection.
+     * @param trends 
+     */
     public void insertTrend(Trends trends)
     {
         mongoClient.setWriteConcern(WriteConcern.JOURNALED);
@@ -90,6 +103,11 @@ public class dbAdapter {
         this.TrendsColl.insert(trends_json);
     }
     
+    /**
+     * Creates a BasicDBObject for this status and inserts it into the Tweets 
+     * collection.
+     * @param status 
+     */
     public void insertTweet(Status status)
     {
         mongoClient.setWriteConcern(WriteConcern.JOURNALED);
@@ -104,5 +122,70 @@ public class dbAdapter {
         //System.out.println(status_json);
         this.TweetsColl.insert(status_json);
     }
-}
+    
+    /**
+     * Returns a cursor pointing to every entry in the Trends collection
+     * You can get every item calling the hasNext() method of the cursor
+     * Important: After you are done call cursor.close to close the connection.
+     * @return 
+     */
+    public DBCursor getTrends()
+    {
+        DBCursor cursor = TrendsColl.find();
+        return cursor;
+    }
+    
+    /**
+     * Returns a cursor pointing to every entry in the Tweets collection
+     * You can get every item calling the hasNext() method of the cursor
+     * Important: After you are done call cursor.close to close the connection.
+     * @return 
+     */
+    public DBCursor getTweets()
+    {
+        DBCursor cursor = TweetsColl.find();
+        return cursor;
+    }
+    
+    /**
+     * Returns a cursor pointing to every entry in the Trends collection that 
+     * matches the criteria given as parameters.
+     * 
+     * Available field options: ID, Text, UserID, UserName, created_at 
+     * 
+     * You can get every item calling the hasNext() method of the cursor
+     * 
+     * IMPORTANT: After you are done call cursor.close to close the connection.
+     * @param field
+     * @param value
+     * @return 
+     */
+    public DBCursor queryTrends(String field, String value)
+    {
+        BasicDBObject query = new BasicDBObject(field, value);
 
+        DBCursor cursor = TrendsColl.find(query);
+        return cursor;
+    }
+    
+    /**
+     * Returns a cursor pointing to every entry in the Tweets collection that 
+     * matches the criteria given as parameters.
+     * 
+     * Available field options: trends, as_of
+     * 
+     * You can get every item calling the hasNext() method of the cursor
+     * 
+     * IMPORTANT: After you are done call cursor.close to close the connection.
+     * @param field
+     * @param value
+     * @return 
+     */
+    public DBCursor queryTweets(String field, String value)
+    {
+        BasicDBObject query = new BasicDBObject(field, value);
+
+        DBCursor cursor = TweetsColl.find(query);
+        return cursor;
+    }
+}
