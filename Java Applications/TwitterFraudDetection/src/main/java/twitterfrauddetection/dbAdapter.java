@@ -17,6 +17,7 @@ import java.net.UnknownHostException;
 import twitter4j.Status;
 import twitter4j.Trend;
 import twitter4j.Trends;
+import twitter4j.User;
 
 /**
  *
@@ -27,7 +28,7 @@ public class dbAdapter {
     private final String host = "localhost";
     private final int port  = 27017;
     private final String databaseName  = "twitter";
-    private String trendID = "trend";
+    private final String trendID = "trend";
     private int trendNum = 1320;
     
     
@@ -35,9 +36,11 @@ public class dbAdapter {
     private DB db;
     private DBCollection TrendsColl;
     private DBCollection TweetsColl;
+    private DBCollection UsersColl;
     private BasicDBObject status_json;
     private BasicDBObject trends_names;
     private BasicDBObject trends_json;
+    private BasicDBObject user_json;
 
     
     private dbAdapter() {  
@@ -64,6 +67,7 @@ public class dbAdapter {
        
        TrendsColl = db.getCollection("trends");
        TweetsColl = db.getCollection("tweets");
+       UsersColl = db.getCollection("users");
     }
     
     /**
@@ -99,7 +103,6 @@ public class dbAdapter {
         trends_json.append("trends", trends_names);
         trends_json.append("as_of", trends.getAsOf());
         
-        //System.out.println(trends_json);
         this.TrendsColl.insert(trends_json);
     }
     
@@ -119,13 +122,34 @@ public class dbAdapter {
         status_json.append("UserID", status.getUser().getId());
         status_json.append("UserName", status.getUser().getName());
         status_json.append("created_at", status.getCreatedAt());
-        //System.out.println(status_json);
+        
         this.TweetsColl.insert(status_json);
     }
     
     /**
-     * Returns a cursor pointing to every entry in the Trends collection
-     * You can get every item calling the hasNext() method of the cursor
+     * Creates a BasicDBObject for this user and inserts it into the Users 
+     * collection.
+     * @param user 
+     */
+    public void insertUser(User user)
+    {
+        mongoClient.setWriteConcern(WriteConcern.JOURNALED);
+        
+        user_json = new BasicDBObject();
+        
+        user_json.append("ID", user.getId());
+        user_json.append("UserName", user.getName());
+        user_json.append("Friends", user.getFriendsCount());
+        user_json.append("Followers", user.getFollowersCount());
+        user_json.append("Description", user.getDescription());
+        user_json.append("created_at", user.getCreatedAt());
+        
+        this.UsersColl.insert(user_json);
+    }
+    
+    /**
+     * Returns a cursor pointing to every entry in the Trends collection.
+     * You can get every item calling the hasNext() method of the cursor.
      * Important: After you are done call cursor.close to close the connection.
      * @return 
      */
@@ -136,8 +160,8 @@ public class dbAdapter {
     }
     
     /**
-     * Returns a cursor pointing to every entry in the Tweets collection
-     * You can get every item calling the hasNext() method of the cursor
+     * Returns a cursor pointing to every entry in the Tweets collection.
+     * You can get every item calling the hasNext() method of the cursor.
      * Important: After you are done call cursor.close to close the connection.
      * @return 
      */
@@ -148,12 +172,24 @@ public class dbAdapter {
     }
     
     /**
+     * Returns a cursor pointing to every entry in the Users collection.
+     * You can get every item calling the hasNext() method of the cursor.
+     * Important: After you are done call cursor.close to close the connection.
+     * @return 
+     */
+    public DBCursor getUsers()
+    {
+        DBCursor cursor = UsersColl.find();
+        return cursor;
+    }
+    
+    /**
      * Returns a cursor pointing to every entry in the Trends collection that 
      * matches the criteria given as parameters.
      * 
-     * Available field options: ID, Text, UserID, UserName, created_at 
+     * Available field options: ID, Text, UserID, UserName, created_at .
      * 
-     * You can get every item calling the hasNext() method of the cursor
+     * You can get every item calling the hasNext() method of the cursor.
      * 
      * IMPORTANT: After you are done call cursor.close to close the connection.
      * @param field
@@ -172,9 +208,9 @@ public class dbAdapter {
      * Returns a cursor pointing to every entry in the Tweets collection that 
      * matches the criteria given as parameters.
      * 
-     * Available field options: trends, as_of
+     * Available field options: trends, as_of .
      * 
-     * You can get every item calling the hasNext() method of the cursor
+     * You can get every item calling the hasNext() method of the cursor.
      * 
      * IMPORTANT: After you are done call cursor.close to close the connection.
      * @param field
@@ -186,6 +222,27 @@ public class dbAdapter {
         BasicDBObject query = new BasicDBObject(field, value);
 
         DBCursor cursor = TweetsColl.find(query);
+        return cursor;
+    }
+    
+    /**
+     * Returns a cursor pointing to every entry in the Users collection that 
+     * matches the criteria given as parameters.
+     * 
+     * Available field options: ID, UserName, Friends, Followers, Description, created_at .
+     * 
+     * You can get every item calling the hasNext() method of the cursor.
+     * 
+     * IMPORTANT: After you are done call cursor.close to close the connection.
+     * @param field
+     * @param value
+     * @return 
+     */
+    public DBCursor queryUsers(String field, String value)
+    {
+        BasicDBObject query = new BasicDBObject(field, value);
+
+        DBCursor cursor = UsersColl.find(query);
         return cursor;
     }
 }
