@@ -13,7 +13,12 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.UnknownHostException;
+import java.util.Properties;
 import twitter4j.Status;
 import twitter4j.Trend;
 import twitter4j.Trends;
@@ -25,9 +30,9 @@ import twitter4j.User;
  */
 public class dbAdapter {
     
-    private final String host = "localhost";
-    private final int port  = 27017;
-    private final String databaseName  = "twitter";
+    private String host;
+    private int port;
+    private String databaseName;
     private final String trendID = "trend";
     private int trendNum = 1320;
     
@@ -61,13 +66,38 @@ public class dbAdapter {
      */
     public void initialize() throws UnknownHostException
     {
-       this.mongoClient = new MongoClient(host, port);
+       File file = new File("mongo.properties");
+       Properties prop = new Properties();
+       InputStream is = null;
        
-       this.db = this.mongoClient.getDB(databaseName);
-       
-       TrendsColl = db.getCollection("trends");
-       TweetsColl = db.getCollection("tweets");
-       UsersColl = db.getCollection("users");
+       try {
+            // check if properties file exists
+            if (file.exists()) {
+                is = new FileInputStream(file);
+                prop.load(is);
+                this.host = prop.getProperty("hostname");
+                this.port = Integer.parseInt(prop.getProperty("port"));
+                this.databaseName = prop.getProperty("databaseName");
+                
+                this.mongoClient = new MongoClient(host, port);
+
+                this.db = this.mongoClient.getDB(databaseName);
+
+                TrendsColl = db.getCollection("trends");
+                TweetsColl = db.getCollection("tweets");
+                UsersColl = db.getCollection("users");
+            }
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+            System.exit(-1);
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException ignore) {
+                }
+            }
+        }
     }
     
     /**
