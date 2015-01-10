@@ -4,3 +4,5 @@
 /Java Applications/TweetMiner/build/
 /Java Applications/TweetMiner/dist/
 /Java Applications/TweetMiner/twitter4j.properties
+twitter4j.properties
+mongo.properties
