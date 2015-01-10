@@ -157,6 +157,27 @@ public class dbAdapter {
     }
     
     /**
+     * Creates a BasicDBObject for this status and inserts it into the  
+     * collection of the User who tweeted it.
+     * @param status 
+     */
+    public void insertUserTweet(Status status)
+    {
+        mongoClient.setWriteConcern(WriteConcern.JOURNALED);
+        
+        status_json = new BasicDBObject();
+        
+        status_json.append("ID", status.getId());
+        status_json.append("Text", status.getText());
+        status_json.append("UserID", status.getUser().getId());
+        status_json.append("UserName", status.getUser().getName());
+        status_json.append("created_at", status.getCreatedAt());
+        
+        String coll = "User" + status.getUser().getId();
+        this.db.getCollection(coll).insert(status_json);
+    }
+    
+    /**
      * Creates a BasicDBObject for this user and inserts it into the Users 
      * collection.
      * @param user 
