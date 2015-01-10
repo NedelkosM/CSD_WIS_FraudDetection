@@ -47,6 +47,4 @@ public class DBTweet {
     public String getCreated_at() {
         return created_at;
     }
-    
-    
 }
