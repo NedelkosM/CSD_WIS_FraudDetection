@@ -42,6 +42,15 @@ public class tStreamFunctions{
      */
     static int iterations;
     /**
+     * Counts the total number of tweets gathered from user being tracked
+     */
+    static int userTweets = 0;
+    /**
+     * Tracked users
+     */
+    static ArrayList trackedUsers; 
+    
+    /**
      * Updates trends array, which is used to filter which tweets will be saved to file. Must be called before streaming listener is initialized.
      * @param newTrends Top 10 Twitter trends. In JSON form.
      */
@@ -98,9 +107,7 @@ public class tStreamFunctions{
                     String trendName = tempTrend.getName();
                     if(status.getText().contains(trendName)){
                         //System.out.println("@" + status.getUser().getScreenName() + " - " + status.getText());
-                        String json = DataObjectFactory.getRawJSON(status);
                         dbAdapter.getInstance().insertTweet(status);
-                        String filename = relPath+File.separator+"Trends"+(iterations-1)+File.separator+"Tweet"+(tweetsPerRun++)+"-"+System.currentTimeMillis()+".json";
                         totalTweets++;
                         //Miner.writeFile(filename, json);
                     }
@@ -145,6 +152,65 @@ public class tStreamFunctions{
             System.out.println("Tweets for last trend : "+tweetsPerRun);
             System.out.println("Total Tweets : "+totalTweets);
             // Reset tweets counter
+            tweetsPerRun = 0;
+        }
+    }
+    /**
+     * Initializes the streaming API listeners. Will parse all incoming tweets and write to file all tweets that use a hashtag from the top trends.
+     * @param newUsers Updates tracked users
+     */
+    public static void startStalkerStream(ArrayList newUsers){
+        if(newUsers!= null){
+            trackedUsers = newUsers;
+        }
+        StatusListener listener = new StatusListener() {
+            @Override
+            public void onStatus(Status status) {
+                long userID = status.getUser().getId();
+                for(int i=0;i<trackedUsers.size();i++){
+                    if(trackedUsers.contains(userID)){
+                        dbAdapter.getInstance().insertUserTweet(status);
+                        userTweets++;
+                    }
+                }
+            }
+
+            @Override
+            public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {
+                //System.out.println("Got a status deletion notice id:" + statusDeletionNotice.getStatusId());
+            }
+
+            @Override
+            public void onTrackLimitationNotice(int numberOfLimitedStatuses) {
+                //System.out.println("Got track limitation notice:" + numberOfLimitedStatuses);
+            }
+
+            @Override
+            public void onScrubGeo(long userId, long upToStatusId) {
+                //System.out.println("Got scrub_geo event userId:" + userId + " upToStatusId:" + upToStatusId);
+            }
+
+            @Override
+            public void onStallWarning(StallWarning warning) {
+                //System.out.println("Got stall warning:" + warning);
+            }
+
+            @Override
+            public void onException(Exception ex) {
+                ex.printStackTrace();
+            }
+        };
+        twitterStream.addListener(listener);
+        twitterStream.sample();
+    }
+    
+    /**
+     * Stops listening to streaming API and reports results for the last 5 minutes.
+     */
+    public static void stopStalkerStream(){
+        if(twitterStream!=null){
+            twitterStream.cleanUp();
+            System.out.println("Total tracked users tweets "+userTweets);
             tweetsPerRun = 0;
         }
     }

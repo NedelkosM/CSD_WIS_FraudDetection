@@ -2,6 +2,7 @@ package twitterfrauddetection;
 
 import java.io.File;
 import java.net.UnknownHostException;
+import twitter4j.User;
 
 /**
  * @author Miltos Nedelkos, nedelkosm at gmail com
@@ -39,7 +40,14 @@ public class App
         */
         
         tFunctions.UserAuth(args);
+        // Creates a stalker with a starting duration of 7 days
         Stalker stalker = new Stalker(7);
+        stalker.addUser(12435);
+        User targetUser = null;
+        stalker.addUser(targetUser);
+        stalker.resetDate();
+        stalker.setDuration(10);
+        stalker.initialize();
         
         //close db connections
         //dbAdapter.getInstance().closeConnections();
