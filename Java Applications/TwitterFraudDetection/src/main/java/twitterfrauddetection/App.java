@@ -29,6 +29,7 @@ public class App
         
         //initialize dbAdapter
         //dbAdapter.getInstance().initialize();
+        
         /* PHASE 1 
         File myfile = new File(relPath+File.separator+"temp.txt");
         if(!myfile.getParentFile().exists()){
