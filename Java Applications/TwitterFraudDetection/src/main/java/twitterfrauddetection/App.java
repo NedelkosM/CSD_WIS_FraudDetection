@@ -28,16 +28,20 @@ public class App
         }
         
         //initialize dbAdapter
-        dbAdapter.getInstance().initialize();
-        
+        //dbAdapter.getInstance().initialize();
+        /* PHASE 1 
         File myfile = new File(relPath+File.separator+"temp.txt");
         if(!myfile.getParentFile().exists()){
             myfile.getParentFile().mkdir();
         }
         tFunctions.UserAuth(args);
         Miner miner = new Miner(864); // This amounts to a total of 3 days for 5-minute itterations.
+        */
+        
+        tFunctions.UserAuth(args);
+        Stalker stalker = new Stalker(7);
         
         //close db connections
-        dbAdapter.getInstance().closeConnections();
+        //dbAdapter.getInstance().closeConnections();
     }
 }
