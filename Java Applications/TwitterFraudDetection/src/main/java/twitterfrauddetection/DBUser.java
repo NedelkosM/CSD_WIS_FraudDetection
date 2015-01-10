@@ -26,8 +26,8 @@ public class DBUser {
         this.Description = obj.get("Description").toString();
         this.created_at = obj.get("created_at").toString();
         this.UserName = obj.get("UserName").toString();
-        this.Friends = Integer.parseInt(obj.get("ID").toString());
-        this.Followers = Integer.parseInt(obj.get("ID").toString());
+        this.Friends = Integer.parseInt(obj.get("Friends").toString());
+        this.Followers = Integer.parseInt(obj.get("Followers").toString());
     }
 
     public String getID() {
