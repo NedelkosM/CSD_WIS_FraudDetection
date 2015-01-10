@@ -1,10 +1,7 @@
 package twitterfrauddetection;
 
 import static twitterfrauddetection.tFunctions.twitterStream;
-import static twitterfrauddetection.App.relPath;
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import twitter4j.StallWarning;
@@ -14,7 +11,6 @@ import twitter4j.StatusListener;
 import twitter4j.Trend;
 import twitter4j.Trends;
 import twitter4j.TwitterException;
-import twitter4j.json.DataObjectFactory;
 import static twitter4j.json.DataObjectFactory.createTrends;
 /**
  * @author Miltos Nedelkos, nedelkosm at gmail com

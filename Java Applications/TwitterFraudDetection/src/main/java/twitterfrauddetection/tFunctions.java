@@ -45,7 +45,7 @@ public final class tFunctions {
     public static TwitterStream twitterStream;
     /**
      * Authendicates the application and creates an OAuth2Token.
-     * @throws Throws exception when a connection to twitter cannot be made or authendication was not successful.
+     * @throws twitter4j.TwitterException Throws exception when a connection to twitter cannot be made or authendication was not successful.
      */
     public static void AppAuth() throws TwitterException, Exception{
         builder = new ConfigurationBuilder();
@@ -101,7 +101,6 @@ public final class tFunctions {
                 prop.store(os, "twitter4j.properties");
             }
         } catch (IOException ioe) {
-            ioe.printStackTrace();
             System.exit(-1);
         } finally {
             if (is != null) {
@@ -135,8 +134,7 @@ public final class tFunctions {
                     System.out.println(requestToken.getAuthorizationURL());
                     try {
                         Desktop.getDesktop().browse(new URI(requestToken.getAuthorizationURL()));
-                    } catch (UnsupportedOperationException ignore) {
-                    } catch (IOException ignore) {
+                    } catch (UnsupportedOperationException | IOException ignore) {
                     } catch (URISyntaxException e) {
                         throw new AssertionError(e);
                     }
@@ -151,8 +149,6 @@ public final class tFunctions {
                     } catch (TwitterException te) {
                         if (401 == te.getStatusCode()) {
                             System.out.println("Unable to get the access token.");
-                        } else {
-                            te.printStackTrace();
                         }
                     }
                 }
@@ -170,7 +166,6 @@ public final class tFunctions {
                 prop.store(os, "twitter4j.properties");
                 os.close();
             } catch (IOException ioe) {
-                ioe.printStackTrace();
                 System.exit(-1);
             } finally {
                 if (os != null) {
@@ -182,13 +177,10 @@ public final class tFunctions {
             }
             System.out.println("Successfully stored access token to " + file.getAbsolutePath() + ".");
             twitterStream = new TwitterStreamFactory().getInstance();
-            //System.exit(0);
         } catch (TwitterException te) {
-            te.printStackTrace();
             System.out.println("Failed to get accessToken: " + te.getMessage());
             System.exit(-1);
         } catch (IOException ioe) {
-            ioe.printStackTrace();
             System.out.println("Failed to read the system input.");
             System.exit(-1);
         }

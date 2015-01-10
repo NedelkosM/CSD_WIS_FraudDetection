@@ -88,7 +88,6 @@ public class dbAdapter {
                 UsersColl = db.getCollection("users");
             }
         } catch (IOException ioe) {
-            ioe.printStackTrace();
             System.exit(-1);
         } finally {
             if (is != null) {

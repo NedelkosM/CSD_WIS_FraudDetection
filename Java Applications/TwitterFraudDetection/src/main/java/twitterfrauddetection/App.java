@@ -2,7 +2,6 @@ package twitterfrauddetection;
 
 import java.io.File;
 import java.net.UnknownHostException;
-import twitter4j.User;
 
 /**
  * @author Miltos Nedelkos, nedelkosm at gmail com
@@ -22,6 +21,7 @@ public class App
     /**
      * Main class. Will parse parameters and initialize the Miner for a 3-day period.
      * @param args [relative path, consumer key, consumer key secret]
+     * @throws java.net.UnknownHostException
      */
     public static void main(String[] args) throws UnknownHostException {
         if(args.length > 0){
