@@ -27,7 +27,7 @@ public class App
         if(args.length > 0){
             relPath = args[0];
         }
-        
+        System.out.println("Hello world");
         //initialize dbAdapter
         //dbAdapter.getInstance().initialize();
         
