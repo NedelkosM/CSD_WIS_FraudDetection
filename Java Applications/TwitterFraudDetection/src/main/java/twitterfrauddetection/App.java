@@ -23,17 +23,18 @@ public class App
      * @param args [relative path, consumer key, consumer key secret]
      * @throws java.net.UnknownHostException
      */
-    public static void main(String[] args) throws UnknownHostException {
+    public static void main(String[] args) throws UnknownHostException 
+    {
         if(args.length > 0){
             relPath = args[0];
         }
-        System.out.println("Hello world");
         //initialize dbAdapter
         //dbAdapter.getInstance().initialize();
         
         /* PHASE 1 
         File myfile = new File(relPath+File.separator+"temp.txt");
-        if(!myfile.getParentFile().exists()){
+        if(!myfile.getParentFile().exists())
+        {
             myfile.getParentFile().mkdir();
         }
         tFunctions.UserAuth(args);
