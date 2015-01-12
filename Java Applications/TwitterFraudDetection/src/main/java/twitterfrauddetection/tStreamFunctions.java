@@ -4,6 +4,7 @@ import static twitterfrauddetection.tFunctions.twitterStream;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import twitter4j.FilterQuery;
 import twitter4j.StallWarning;
 import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
@@ -159,6 +160,15 @@ public class tStreamFunctions{
         if(newUsers!= null){
             trackedUsers = newUsers;
         }
+        
+        FilterQuery filter = new FilterQuery();
+        long[] users = new long[trackedUsers.size()];
+        for(int i=0;i<users.length;i++){
+            users[i] = (long) trackedUsers.get(i);
+        }
+        filter.follow(users);
+        twitterStream.filter(filter);
+        
         StatusListener listener = new StatusListener() {
             @Override
             public void onStatus(Status status) {
