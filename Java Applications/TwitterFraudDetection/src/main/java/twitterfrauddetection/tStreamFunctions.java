@@ -95,6 +95,15 @@ public class tStreamFunctions{
         if(newTrends == null) return;
         updateTrends(newTrends);
         iterations = iteration;
+         // Filter
+        FilterQuery filter = new FilterQuery();
+        String[] keywordsArray = new String[trends.size()];
+        for(int i=0;i<keywordsArray.length;i++){
+            keywordsArray[i] = (String) trends.get(i);
+        }
+        filter.track(keywordsArray);
+        twitterStream.filter(filter);
+        
         StatusListener listener = new StatusListener() {
             @Override
             public void onStatus(Status status) {
