@@ -25,29 +25,50 @@ public class App
      */
     public static void main(String[] args) throws UnknownHostException 
     {
-        if(args.length > 0){
+        String correct_usage = "Wrong input.Correct usage is: java -jar TwitterFraudDetection-1.0.jar <directory_name> <Miner/Stalker>";
+        
+        if(args.length > 1){
             relPath = args[0];
         }
-        //initialize dbAdapter
-        //dbAdapter.getInstance().initialize();
-        
-        /* PHASE 1 
-        File myfile = new File(relPath+File.separator+"temp.txt");
-        if(!myfile.getParentFile().exists())
+        else
         {
-            myfile.getParentFile().mkdir();
+            System.out.println(correct_usage);
         }
-        tFunctions.UserAuth(args);
-        Miner miner = new Miner(864); // This amounts to a total of 3 days for 5-minute itterations.
-        */
+        //initialize dbAdapter
+        dbAdapter.getInstance().initialize();
         
-        tFunctions.UserAuth(args);
-        // Creates a stalker with a starting duration of 7 days
-        Stalker stalker = new Stalker(7);
-        //stalker.addUser(USERID or twitter4j.User class);
-        stalker.initialize();
+        System.out.println(args[1]);
+        switch (args[1])
+        {
+            case "Miner":
+                // PHASE 1 
+                File myfile = new File(relPath + File.separator + "temp.txt");
+                if (!myfile.getParentFile().exists()) 
+                {
+                    myfile.getParentFile().mkdir();
+                }
+                tFunctions.UserAuth(args);
+                Miner miner = new Miner(864); // This amounts to a total of 3 days for 5-minute itterations.
+                break;
+            case "Stalker":
+                tFunctions.UserAuth(args);
+                // Creates a stalker with a starting duration of 7 days
+                Stalker stalker = new Stalker(7);
+                //stalker.addUser(USERID or twitter4j.User class);
+                stalker.initialize();
+                break;
+            default:
+                System.out.println(correct_usage);
+
+        }
         
+        
+        
+        
+        
+        
+                
         //close db connections
-        //dbAdapter.getInstance().closeConnections();
+        dbAdapter.getInstance().closeConnections();
     }
 }

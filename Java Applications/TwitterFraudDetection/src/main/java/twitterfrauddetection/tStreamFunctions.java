@@ -99,7 +99,7 @@ public class tStreamFunctions{
         FilterQuery filter = new FilterQuery();
         String[] keywordsArray = new String[trends.size()];
         for(int i=0;i<keywordsArray.length;i++){
-            keywordsArray[i] = (String) trends.get(i);
+            keywordsArray[i] = trends.get(i).toString();
         }
         filter.track(keywordsArray);
         twitterStream.filter(filter);

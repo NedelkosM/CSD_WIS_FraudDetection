@@ -34,7 +34,7 @@ public class dbAdapter {
     private int port;
     private String databaseName;
     private final String trendID = "trend";
-    private int trendNum = 1320;
+    private int trendNum = 2740;
     
     
     private MongoClient mongoClient;
@@ -126,6 +126,7 @@ public class dbAdapter {
             
             if(trendNum%50 == 0)
             {
+                System.out.println("Garbage collector called.");
                 System.gc();
             }
         }
