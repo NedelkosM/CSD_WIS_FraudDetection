@@ -37,7 +37,6 @@ public class App
         //initialize dbAdapter
         dbAdapter.getInstance().initialize();
         
-        System.out.println(args[1]);
         switch (args[1])
         {
             case "Miner":
@@ -59,15 +58,9 @@ public class App
                 break;
             default:
                 System.out.println(correct_usage);
+                break;
 
         }
-        
-        
-        
-        
-        
-        
-                
         //close db connections
         dbAdapter.getInstance().closeConnections();
     }
