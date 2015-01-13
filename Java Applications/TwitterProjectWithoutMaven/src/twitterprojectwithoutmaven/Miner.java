@@ -2,7 +2,7 @@ package twitterprojectwithoutmaven;
 
 import static twitterprojectwithoutmaven.tStreamFunctions.startStream;
 import static twitterprojectwithoutmaven.tStreamFunctions.stopStream;
-import static twitterprojectwithoutmaven.App.relPath;
+import static twitterprojectwithoutmaven.TwitterProjectWithoutMaven.relPath;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;

@@ -30,7 +30,7 @@ public class TwitterProjectWithoutMaven {
      */
     public static void main(String[] args) throws UnknownHostException 
     {
-        String correct_usage = "Wrong input.Correct usage is: java -jar TwitterFraudDetection-1.0.jar <directory_name> <Miner/Stalker>";
+        String correct_usage = "Wrong input.Correct usage is: java -jar TwitterProjectWithoutMaven.jar <directory_name> <Miner/Stalker>";
 
         if (args.length > 1) {
             relPath = args[0];
