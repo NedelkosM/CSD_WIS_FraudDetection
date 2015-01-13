@@ -40,8 +40,7 @@ public class TwitterProjectWithoutMaven {
 
             switch (args[1]) {
                 case "Miner":
-                    // PHASE 1 
-                    /*
+                    // PHASE 1
                     File myfile = new File(relPath + File.separator + "temp.txt");
                     if (!myfile.getParentFile().exists()) 
                     {
@@ -49,9 +48,6 @@ public class TwitterProjectWithoutMaven {
                     }
                     tFunctions.UserAuth(args);
                     Miner miner = new Miner(864); // This amounts to a total of 3 days for 5-minute itterations.
-                            */
-                    dbAdapter.getInstance().fillUsers();
-                    
                     break;
                 case "Stalker":
                     tFunctions.UserAuth(args);
