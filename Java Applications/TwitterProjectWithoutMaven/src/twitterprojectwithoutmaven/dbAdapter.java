@@ -11,6 +11,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
 import java.io.File;
@@ -199,6 +200,24 @@ public class dbAdapter {
     }
     
     /**
+     * Creates a BasicDBObject for this user and inserts it into the Users 
+     * collection.
+     * @param ID 
+     * @param UserName 
+     */
+    public void insertUser(String ID,String UserName)
+    {
+        mongoClient.setWriteConcern(WriteConcern.JOURNALED);
+        
+        user_json = new BasicDBObject();
+        
+        user_json.append("ID", ID);
+        user_json.append("UserName", UserName);
+        
+        this.UsersColl.insert(user_json,new WriteConcern(0, 0, false, false, true));
+    }
+    
+    /**
      * Returns a cursor pointing to every entry in the Trends collection.
      * You can get every item calling the hasNext() method of the cursor.
      * Important: After you are done call cursor.close to close the connection.
@@ -295,5 +314,16 @@ public class dbAdapter {
 
         DBCursor cursor = UsersColl.find(query);
         return cursor;
+    }
+    
+    public void fillUsers()
+    {
+        DBCursor c_tweets = this.getTweets();
+        DBObject obj;
+        while (c_tweets.hasNext())
+        {
+            obj = c_tweets.next();
+            this.insertUser(obj.get("UserID").toString(), obj.get("UserName").toString());
+        }
     }
 }
