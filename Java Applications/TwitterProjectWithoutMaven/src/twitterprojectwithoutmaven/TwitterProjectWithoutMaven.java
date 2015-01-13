@@ -5,6 +5,7 @@
  */
 package twitterprojectwithoutmaven;
 
+import com.mongodb.DBCursor;
 import java.io.File;
 import java.net.UnknownHostException;
 
@@ -48,6 +49,7 @@ public class TwitterProjectWithoutMaven {
                     }
                     tFunctions.UserAuth(args);
                     Miner miner = new Miner(864); // This amounts to a total of 3 days for 5-minute itterations.
+                    
                     break;
                 case "Stalker":
                     tFunctions.UserAuth(args);
