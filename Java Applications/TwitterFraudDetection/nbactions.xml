@@ -29,6 +29,7 @@
             </goals>
             <properties>
                 <skipTests>true</skipTests>
+                <jpda.listen>maven</jpda.listen>
             </properties>
         </action>
     </actions>
