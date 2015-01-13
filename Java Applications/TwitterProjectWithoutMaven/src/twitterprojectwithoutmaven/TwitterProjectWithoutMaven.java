@@ -5,7 +5,6 @@
  */
 package twitterprojectwithoutmaven;
 
-import com.mongodb.DBCursor;
 import java.io.File;
 import java.net.UnknownHostException;
 
