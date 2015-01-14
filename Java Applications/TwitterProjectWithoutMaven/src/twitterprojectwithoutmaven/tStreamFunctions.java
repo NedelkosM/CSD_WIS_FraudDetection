@@ -25,7 +25,7 @@ public class tStreamFunctions{
     /**
      * Trends array. Used to filter which tweets contain a popular hashtag.
      */
-    static ArrayList trends;
+    static ArrayList<TimedTrend> trends;
     /**
      * Counts the number of tweets recored since the program started.
      */
@@ -61,12 +61,13 @@ public class tStreamFunctions{
             for(int i=0;i<trendsObj.length;i++){
                 tempTTrends[i] = new TimedTrend(trendsObj[i]);
             }
-            
             for(TimedTrend t:tempTTrends){
                 boolean placed = false;
                 for (int i=0;i<trends.size();i++){
                     TimedTrend temp = (TimedTrend) trends.get(i);
-                    if(temp.getTrend().getName().equals(t.getTrend().getName())){
+                    String tempName = temp.getTrend().getName();
+                    String tName = t.getTrend().getName();
+                    if(tempName.equals(tName)){
                         t.refresh();
                         placed = true;
                         break;
@@ -95,29 +96,12 @@ public class tStreamFunctions{
         if(newTrends == null) return;
         updateTrends(newTrends);
         iterations = iteration;
-         // Filter
-        FilterQuery filter = new FilterQuery();
-        String[] keywordsArray = new String[trends.size()];
-        for(int i=0;i<keywordsArray.length;i++){
-            keywordsArray[i] = trends.get(i).toString();
-        }
-        filter.track(keywordsArray);
-        twitterStream.filter(filter);
         
         StatusListener listener = new StatusListener() {
             @Override
             public void onStatus(Status status) {
-                for(int i=0;i<trends.size();i++){
-                    TimedTrend tt = (TimedTrend) trends.get(i);
-                    Trend tempTrend = tt.getTrend();
-                    String trendName = tempTrend.getName();
-                    if(status.getText().contains(trendName)){
-                        //System.out.println("@" + status.getUser().getScreenName() + " - " + status.getText());
-                        dbAdapter.getInstance().insertTweet(status);
-                        totalTweets++;
-                        //Miner.writeFile(filename, json);
-                    }
-                }
+                System.out.println("@" + status.getUser().getScreenName() + " - " + status.getText());
+                totalTweets++;
             }
 
             @Override
@@ -146,7 +130,16 @@ public class tStreamFunctions{
             }
         };
         twitterStream.addListener(listener);
-        twitterStream.sample();
+         // Filter
+        FilterQuery filter = new FilterQuery();
+        String[] keywordsArray = new String[trends.size()];
+        TimedTrend temp;
+        for(int i=0;i<keywordsArray.length;i++){
+            temp = (TimedTrend) trends.get(i);
+            keywordsArray[i] = temp.getTrend().getName();
+        }
+        filter.track(keywordsArray);
+        twitterStream.filter(filter);
     }
     
     /**
@@ -166,17 +159,12 @@ public class tStreamFunctions{
      * @param newUsers Updates tracked users
      */
     public static void startStalkerStream(ArrayList newUsers){
-        if(newUsers!= null){
+        if(newUsers != null && newUsers.size()>0){
             trackedUsers = newUsers;
+        } else {
+            System.out.println("No users to track. Exiting stream.");
+            return;
         }
-        
-        FilterQuery filter = new FilterQuery();
-        long[] users = new long[trackedUsers.size()];
-        for(int i=0;i<users.length;i++){
-            users[i] = (long) trackedUsers.get(i);
-        }
-        filter.follow(users);
-        twitterStream.filter(filter);
         
         StatusListener listener = new StatusListener() {
             @Override
@@ -184,7 +172,7 @@ public class tStreamFunctions{
                 long userID = status.getUser().getId();
                 for(int i=0;i<trackedUsers.size();i++){
                     if(trackedUsers.contains(userID)){
-                        dbAdapter.getInstance().insertUserTweet(status);
+                        System.out.println("@" + status.getUser().getScreenName() + " - " + status.getText());
                         userTweets++;
                     }
                 }
@@ -215,8 +203,16 @@ public class tStreamFunctions{
                 ex.printStackTrace();
             }
         };
+        
         twitterStream.addListener(listener);
-        twitterStream.sample();
+         // Filter
+        FilterQuery filter = new FilterQuery();
+        long[] users = new long[trackedUsers.size()];
+        for(int i=0;i<users.length;i++){
+            users[i] = (long) trackedUsers.get(i);
+        }
+        filter.follow(users);
+        twitterStream.filter(filter);
     }
     
     /**

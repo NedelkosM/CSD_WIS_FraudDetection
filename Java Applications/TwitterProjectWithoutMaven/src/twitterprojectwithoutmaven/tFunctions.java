@@ -14,8 +14,6 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.Properties;
 import java.util.logging.Level;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
 import twitter4j.*;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.OAuth2Token;
@@ -55,12 +53,12 @@ public final class tFunctions {
         twitter = new TwitterFactory(builder.build()).getInstance();
         // exercise & verify
         OAuth2Token token = twitter.getOAuth2Token();
-        assertEquals("bearer", token.getTokenType());
+        //assertEquals("bearer", token.getTokenType());
 
         Map<String, RateLimitStatus> rateLimitStatus = twitter.getRateLimitStatus("search");
         RateLimitStatus searchTweetsRateLimit = rateLimitStatus.get("/search/tweets");
-        assertNotNull(searchTweetsRateLimit);
-        assertEquals(searchTweetsRateLimit.getLimit(), 450);
+        //assertNotNull(searchTweetsRateLimit);
+        //assertEquals(searchTweetsRateLimit.getLimit(), 450);
     }
     /**
      * Authenticates the application and creates an OAuthToken. If access token is not already saved, it will ask user for authentication and save the token at twitter4j.properties.
@@ -82,7 +80,7 @@ public final class tFunctions {
                 prop.load(is);
             }
             // if enough arguements are given to main. Will overwrite the properties file
-            if (args.length < 3) {
+            if (args.length < 4) {
                 // if the arguements were not enough and the properties file was not found
                 if (null == prop.getProperty("oauth.consumerKey")
                         && null == prop.getProperty("oauth.consumerSecret")) {
@@ -94,8 +92,8 @@ public final class tFunctions {
                 }
             } else {
                 // Get settings from main
-                prop.setProperty("oauth.consumerKey", args[1]);
-                prop.setProperty("oauth.consumerSecret", args[2]);
+                prop.setProperty("oauth.consumerKey", args[2]);
+                prop.setProperty("oauth.consumerSecret", args[3]);
                 os = new FileOutputStream("twitter4j.properties");
                 // Store token to properties
                 prop.store(os, "twitter4j.properties");
@@ -211,7 +209,7 @@ public final class tFunctions {
             return null;
         }
         String json = DataObjectFactory.getRawJSON(trends);
-        dbAdapter.getInstance().insertTrend(trends);
+        System.out.println(json);
         return json;
     }
 }

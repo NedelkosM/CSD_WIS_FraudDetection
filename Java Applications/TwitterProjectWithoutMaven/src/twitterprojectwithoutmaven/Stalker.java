@@ -42,8 +42,9 @@ public class Stalker {
      */
     public Stalker(int duration){
         dateStarted = new Date();
-        System.out.println("New stalker class. Created at: "+dateStarted);
-        System.out.println("Set stalker duration at: "+duration+" days.");
+        System.out.println("Stalker - New Stalker. Created at: "+dateStarted);
+        System.out.println("Stalker - Set stalker duration at: "+duration+" days.");
+        this.duration = duration;
         trackedUsers = new ArrayList<>();
     }
     /**
@@ -51,7 +52,7 @@ public class Stalker {
      */
     public Stalker(){
         dateStarted = new Date();
-        System.out.println("New stalker class. Created at: "+dateStarted);
+        System.out.println("Stalker - New stalker class. Created at: "+dateStarted);
         trackedUsers = new ArrayList<>();
     }
     /**
@@ -71,10 +72,15 @@ public class Stalker {
      * Initializes the stalker
      */
     public void initialize(){
+        if(trackedUsers != null && trackedUsers.size()>0){
         startStalkerStream(trackedUsers);
+        } else {
+            System.out.println("Stalker - No users to track.");
+            return;
+        }
         System.out.println("--- Initializing Stalker ---");
         System.out.println("Stalker - Users tracked : "+trackedUsers.size());
-        System.out.println("Stalker - Will report every"+reportTimer+"minutes");
+        System.out.println("Stalker - Will report every "+reportTimer+" minutes");
         System.out.println("--- Stalker Initialized ---");
         
         Date currentDate = new Date();
@@ -91,15 +97,17 @@ public class Stalker {
         }
     }
     /**
-     * Adds a new user at tracked users list.
-     * @param userID The new user's ID.
+     * Adds a new user at tracked users list. Note that Twitter uses 64-bit long IDs.
+     * If you want to insert an ID manually you have to add l suffix to your number.
+     * for example : 3847015174 is 32-bit but 3847015174l is 64-bit long.
+     * @param userID The new user's ID (must be 64-bit).
      */
     public void addUser(long userID){
         if(trackedUsers.contains(userID)){
-            System.out.println("User already tracked.");
+            System.out.println("Stalker - User already tracked.");
         } else {
             trackedUsers.add(userID);
-            System.out.println("Tracking user "+userID);
+            System.out.println("Stalker - Tracking user "+userID);
         }
     }
     /**
@@ -108,7 +116,7 @@ public class Stalker {
      */
     public void addUser(User newUser){
         if(newUser == null){
-            System.out.println("No new user given.");
+            System.out.println("Stalker - No new user given.");
             return;
         }
         long userID = newUser.getId();
@@ -120,10 +128,10 @@ public class Stalker {
      */
     public void removeUser(long userID){
         if(!trackedUsers.contains(userID)){
-            System.out.println("User was not on tracked list.");
+            System.out.println("Stalker - User was not on tracked list.");
         } else {
             trackedUsers.remove(userID);
-            System.out.println("User "+userID+" is no longer tracked.");
+            System.out.println("Stalker - User "+userID+" is no longer tracked.");
         }
     }
     /**
