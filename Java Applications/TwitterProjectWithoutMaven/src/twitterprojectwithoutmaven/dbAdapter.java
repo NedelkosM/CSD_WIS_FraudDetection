@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package twitterprojectwithoutmaven;
 
 
@@ -11,7 +5,6 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
 import java.io.File;
@@ -34,7 +27,7 @@ public class dbAdapter {
     private String host;
     private int port;
     private String databaseName;
-    private final String trendID = "trend";
+    private final int trendID = 1;
     private int trendNum = 2740;
     
     
@@ -43,10 +36,12 @@ public class dbAdapter {
     private DBCollection TrendsColl;
     private DBCollection TweetsColl;
     private DBCollection UsersColl;
+    private DBCollection TrendColl;
     private BasicDBObject status_json;
     private BasicDBObject trends_names;
     private BasicDBObject trends_json;
     private BasicDBObject user_json;
+    private BasicDBObject trend_json;
 
     
     private dbAdapter() {  
@@ -87,6 +82,7 @@ public class dbAdapter {
                 TrendsColl = db.getCollection("trends");
                 TweetsColl = db.getCollection("tweets");
                 UsersColl = db.getCollection("users");
+                TrendColl = db.getCollection("trend");
             }
         } catch (IOException ioe) {
             System.exit(-1);
@@ -121,8 +117,13 @@ public class dbAdapter {
         trends_json = new BasicDBObject();
         for(Trend t : trends.getTrends())
         {
-            String field = trendID + trendNum;
-            trends_names.append(field, t.getName());
+            trend_json = new BasicDBObject();
+            
+            trend_json.append("ID", trendNum);
+            trend_json.append("Name", t.getName());
+            
+            trends_names.append("ID", trendNum);
+            trends_names.append("trend"+trendNum, t.getName());
             trendNum++;
             
             if(trendNum%50 == 0)
@@ -130,11 +131,12 @@ public class dbAdapter {
                 System.out.println("Garbage collector called.");
                 System.gc();
             }
+            this.TrendColl.insert(trend_json, new WriteConcern(0, 0, false, false, true));
         }
         trends_json.append("trends", trends_names);
         trends_json.append("as_of", trends.getAsOf());
         
-        this.TrendsColl.insert(trends_json);
+        this.TrendsColl.insert(trends_json,new WriteConcern(0, 0, false, false, true));
     }
     
     /**
@@ -154,7 +156,8 @@ public class dbAdapter {
         status_json.append("UserName", status.getUser().getName());
         status_json.append("created_at", status.getCreatedAt());
         
-        this.TweetsColl.insert(status_json);
+        this.TweetsColl.insert(status_json,new WriteConcern(0, 0, false, false, true));
+        this.insertUser(status.getUser());
     }
     
     /**
@@ -175,7 +178,7 @@ public class dbAdapter {
         status_json.append("created_at", status.getCreatedAt());
         
         String coll = "User" + status.getUser().getId();
-        this.db.getCollection(coll).insert(status_json);
+        this.db.getCollection(coll).insert(status_json,new WriteConcern(0, 0, false, false, true));
     }
     
     /**
@@ -195,24 +198,6 @@ public class dbAdapter {
         user_json.append("Followers", user.getFollowersCount());
         user_json.append("Description", user.getDescription());
         user_json.append("created_at", user.getCreatedAt());
-        
-        this.UsersColl.insert(user_json);
-    }
-    
-    /**
-     * Creates a BasicDBObject for this user and inserts it into the Users 
-     * collection.
-     * @param ID 
-     * @param UserName 
-     */
-    public void insertUser(String ID,String UserName)
-    {
-        mongoClient.setWriteConcern(WriteConcern.JOURNALED);
-        
-        user_json = new BasicDBObject();
-        
-        user_json.append("ID", ID);
-        user_json.append("UserName", UserName);
         
         this.UsersColl.insert(user_json,new WriteConcern(0, 0, false, false, true));
     }
@@ -314,16 +299,5 @@ public class dbAdapter {
 
         DBCursor cursor = UsersColl.find(query);
         return cursor;
-    }
-    
-    public void fillUsers()
-    {
-        DBCursor c_tweets = this.getTweets();
-        DBObject obj;
-        while (c_tweets.hasNext())
-        {
-            obj = c_tweets.next();
-            this.insertUser(obj.get("UserID").toString(), obj.get("UserName").toString());
-        }
     }
 }
