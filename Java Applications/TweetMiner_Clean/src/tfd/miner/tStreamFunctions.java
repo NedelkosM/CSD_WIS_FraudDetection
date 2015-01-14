@@ -1,5 +1,6 @@
 package tfd.miner;
 
+import java.io.File;
 import static tfd.miner.tFunctions.twitterStream;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -12,6 +13,7 @@ import twitter4j.StatusListener;
 import twitter4j.Trend;
 import twitter4j.Trends;
 import twitter4j.TwitterException;
+import twitter4j.TwitterObjectFactory;
 import static twitter4j.json.DataObjectFactory.createTrends;
 /**
  * @author Miltos Nedelkos, nedelkosm at gmail com
@@ -100,8 +102,10 @@ public class tStreamFunctions{
         StatusListener listener = new StatusListener() {
             @Override
             public void onStatus(Status status) {
-                System.out.println("@" + status.getUser().getScreenName() + " - " + status.getText());
+                String filepath = App.relPath+File.separator+"Trends"+(iterations-1)+File.separator+"Tweet"+totalTweets+".json";
+                Miner.writeFile(filepath, status.toString());
                 totalTweets++;
+                tweetsPerRun ++;
             }
 
             @Override

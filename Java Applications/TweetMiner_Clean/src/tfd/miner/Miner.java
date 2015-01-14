@@ -79,7 +79,7 @@ public class Miner implements Runnable{
         }
         
         filename = relPath+File.separator+"Trends"+successfulFiles+File.separator+"Trends"+(totalFiles++)+".json";
-        //writeFile(filename,trends);
+        writeFile(filename,trends);
         
         return filename;
     }

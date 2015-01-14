@@ -15,6 +15,7 @@ import java.util.*;
 import java.util.Properties;
 import java.util.logging.Level;
 import twitter4j.*;
+import static twitter4j.TwitterObjectFactory.getRawJSON;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.OAuth2Token;
 import twitter4j.auth.RequestToken;
@@ -208,8 +209,7 @@ public final class tFunctions {
             java.util.logging.Logger.getLogger(tFunctions.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
-        String json = DataObjectFactory.getRawJSON(trends);
-        System.out.println(json);
+        String json = getRawJSON(trends);
         return json;
     }
 }
