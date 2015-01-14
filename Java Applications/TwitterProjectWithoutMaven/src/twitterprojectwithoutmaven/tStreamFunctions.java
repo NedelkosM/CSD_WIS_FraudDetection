@@ -100,7 +100,8 @@ public class tStreamFunctions{
         StatusListener listener = new StatusListener() {
             @Override
             public void onStatus(Status status) {
-                System.out.println("@" + status.getUser().getScreenName() + " - " + status.getText());
+                //System.out.println("@" + status.getUser().getScreenName() + " - " + status.getText());
+                dbAdapter.getInstance().insertTweet(status);
                 totalTweets++;
             }
 
@@ -172,7 +173,8 @@ public class tStreamFunctions{
                 long userID = status.getUser().getId();
                 for(int i=0;i<trackedUsers.size();i++){
                     if(trackedUsers.contains(userID)){
-                        System.out.println("@" + status.getUser().getScreenName() + " - " + status.getText());
+                        //System.out.println("@" + status.getUser().getScreenName() + " - " + status.getText());
+                        dbAdapter.getInstance().insertUserTweet(status);
                         userTweets++;
                     }
                 }

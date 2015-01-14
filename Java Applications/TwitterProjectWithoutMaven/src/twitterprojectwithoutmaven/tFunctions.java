@@ -209,7 +209,8 @@ public final class tFunctions {
             return null;
         }
         String json = DataObjectFactory.getRawJSON(trends);
-        System.out.println(json);
+        //System.out.println(json);
+        dbAdapter.getInstance().insertTrend(trends);
         return json;
     }
 }
