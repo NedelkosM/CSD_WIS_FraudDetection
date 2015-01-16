@@ -58,14 +58,6 @@ public class dbAdapter {
     public static dbAdapter getInstance() {
         return dbAdapterHolder.INSTANCE;
     }
-
-    DBCursor getUserTweets(String id) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    DBCursor getStalkedUsers() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
     
     private static class dbAdapterHolder {
 
@@ -232,7 +224,7 @@ public class dbAdapter {
      * selectedUsers collection.
      * @param user 
      */
-    public void insertSelectedUser(DBUser user)
+    public void insertStalkedUser(DBUser user)
     {
         mongoClient.setWriteConcern(WriteConcern.JOURNALED);
         
@@ -264,7 +256,7 @@ public class dbAdapter {
      */
     public DBCursor getTrends()
     {
-        DBCursor cursor = TrendsColl.find();
+        DBCursor cursor = TrendColl.find();
         return cursor;
     }
     
@@ -298,7 +290,7 @@ public class dbAdapter {
      * IMPORTANT: After you are done call cursor.close to close the connection.
      * @return 
      */
-    public DBCursor getSelectedUsers()
+    public DBCursor getStalkedUsers()
     {
         DBCursor cursor = SelectedUsersColl.find();
         return cursor;
@@ -313,7 +305,7 @@ public class dbAdapter {
      * @param id
      * @return 
      */
-    public DBCursor getUserTweets(int id)
+    public DBCursor getStalkedUserTweets(int id)
     {
         String collection = "User"+id;
         DBCollection dbColl = db.getCollection(collection);
@@ -330,7 +322,7 @@ public class dbAdapter {
     */
     
     /**
-     * Returns a cursor pointing to every entry in the Tweets collection that 
+     * Returns a cursor pointing to every entry in the Trend collection that 
      * matches the criteria given as parameters.
      * 
      * Available field options: trends, as_of .
@@ -346,12 +338,12 @@ public class dbAdapter {
     {
         BasicDBObject query = new BasicDBObject(field, value);
 
-        DBCursor cursor = TrendsColl.find(query);
+        DBCursor cursor = TrendColl.find(query);
         return cursor;
     }
     
     /**
-     * Returns a cursor pointing to every entry in the Trends collection that 
+     * Returns a cursor pointing to every entry in the Tweets collection that 
      * matches the criteria given as parameters.
      * 
      * Available field options: ID, Text, UserID, UserName, created_at .
@@ -405,7 +397,7 @@ public class dbAdapter {
      * @param value
      * @return 
      */
-    public DBCursor querySelectedUsers(String field, String value)
+    public DBCursor queryStalkedUsers(String field, String value)
     {
         BasicDBObject query = new BasicDBObject(field, value);
 
@@ -426,7 +418,7 @@ public class dbAdapter {
      * @param value
      * @return 
      */
-    public DBCursor querySelectedUsers(String field, String value, int userID)
+    public DBCursor queryStalkedUsersTweets(String field, String value, int userID)
     {
         BasicDBObject query = new BasicDBObject(field, value);
         
