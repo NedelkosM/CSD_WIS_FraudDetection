@@ -22,7 +22,7 @@ public class DBTweet {
     public DBTweet (DBObject obj)
     {
        this.ID = obj.get("ID").toString();
-       this.Text = obj.get("ID").toString();
+       this.Text = obj.get("Text").toString();
        this.UserID = obj.get("UserID").toString();
        this.UserName = obj.get("UserName").toString();
        this.created_at = obj.get("created_at").toString();
@@ -46,5 +46,34 @@ public class DBTweet {
 
     public String getCreated_at() {
         return created_at;
+    }
+
+    long getReTweets() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    long isAReply() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+
+    long getMentions() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    long isAreTweet() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    long getHasTags() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    long getUrls() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    long isASimpleTweet() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

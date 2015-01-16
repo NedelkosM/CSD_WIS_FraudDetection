@@ -50,6 +50,14 @@ public class dbAdapter {
     public static dbAdapter getInstance() {
         return dbAdapterHolder.INSTANCE;
     }
+
+    DBCursor getUserTweets(String id) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    DBCursor getStalkedUsers() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
     private static class dbAdapterHolder {
 
