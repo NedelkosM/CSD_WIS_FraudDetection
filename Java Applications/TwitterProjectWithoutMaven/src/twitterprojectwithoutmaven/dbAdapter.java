@@ -37,12 +37,20 @@ public class dbAdapter {
     private DBCollection TweetsColl;
     private DBCollection UsersColl;
     private DBCollection TrendColl;
+    private DBCollection SelectedUsersColl;
     private BasicDBObject status_json;
     private BasicDBObject trends_names;
     private BasicDBObject trends_json;
     private BasicDBObject user_json;
     private BasicDBObject trend_json;
 
+    /**
+     * 
+     * 
+     * INITIALIZATION METHODS
+     * 
+     * 
+    */
     
     private dbAdapter() {  
     }
@@ -91,6 +99,7 @@ public class dbAdapter {
                 TweetsColl = db.getCollection("tweets");
                 UsersColl = db.getCollection("users");
                 TrendColl = db.getCollection("trend");
+                SelectedUsersColl = db.getCollection("selectedUsers");
             }
         } catch (IOException ioe) {
             System.exit(-1);
@@ -111,6 +120,14 @@ public class dbAdapter {
     {
         this.mongoClient.close();
     }
+    
+   /**
+     * 
+     * 
+     * INSERT METHODS
+     * 
+     * 
+    */
     
     /**
      * Creates a BasicDBObject for this trend and inserts it into the Trends 
@@ -211,9 +228,38 @@ public class dbAdapter {
     }
     
     /**
+     * Creates a BasicDBObject for this selected user and inserts it into the 
+     * selectedUsers collection.
+     * @param user 
+     */
+    public void insertSelectedUser(DBUser user)
+    {
+        mongoClient.setWriteConcern(WriteConcern.JOURNALED);
+        
+        user_json = new BasicDBObject();
+        
+        user_json.append("ID", user.getID());
+        user_json.append("UserName", user.getUserName());
+        user_json.append("Friends", user.getFriends());
+        user_json.append("Followers", user.getFollowers());
+        user_json.append("Description", user.getDescription());
+        user_json.append("created_at", user.getCreated_at());
+        
+        this.SelectedUsersColl.insert(user_json,new WriteConcern(0, 0, false, false, true));
+    }
+    
+    /**
+     * 
+     * 
+     * GET METHODS
+     * 
+     * 
+    */
+    
+    /**
      * Returns a cursor pointing to every entry in the Trends collection.
      * You can get every item calling the hasNext() method of the cursor.
-     * Important: After you are done call cursor.close to close the connection.
+     * IMPORTANT: After you are done call cursor.close to close the connection.
      * @return 
      */
     public DBCursor getTrends()
@@ -225,7 +271,7 @@ public class dbAdapter {
     /**
      * Returns a cursor pointing to every entry in the Tweets collection.
      * You can get every item calling the hasNext() method of the cursor.
-     * Important: After you are done call cursor.close to close the connection.
+     * IMPORTANT: After you are done call cursor.close to close the connection.
      * @return 
      */
     public DBCursor getTweets()
@@ -237,7 +283,7 @@ public class dbAdapter {
     /**
      * Returns a cursor pointing to every entry in the Users collection.
      * You can get every item calling the hasNext() method of the cursor.
-     * Important: After you are done call cursor.close to close the connection.
+     * IMPORTANT: After you are done call cursor.close to close the connection.
      * @return 
      */
     public DBCursor getUsers()
@@ -247,10 +293,47 @@ public class dbAdapter {
     }
     
     /**
-     * Returns a cursor pointing to every entry in the Trends collection that 
+     * Returns a cursor pointing to every entry in the selectedUsers collection.
+     * You can get every item calling the hasNext() method of the cursor.
+     * IMPORTANT: After you are done call cursor.close to close the connection.
+     * @return 
+     */
+    public DBCursor getSelectedUsers()
+    {
+        DBCursor cursor = SelectedUsersColl.find();
+        return cursor;
+    }
+    
+    /**
+     * Returns a cursor pointing to every tweet of the user with this id.
+     * The users are from the selectedUsers the program has stalked for a period of time.
+     * The tweets are the ones retrieved during that period.
+     * You can get every item calling the hasNext() method of the cursor.
+     * IMPORTANT: After you are done call cursor.close to close the connection.
+     * @param id
+     * @return 
+     */
+    public DBCursor getUserTweets(int id)
+    {
+        String collection = "User"+id;
+        DBCollection dbColl = db.getCollection(collection);
+        DBCursor cursor = dbColl.find();
+        return cursor;
+    }
+    
+    /**
+     * 
+     * 
+     * QUERY METHODS
+     * 
+     * 
+    */
+    
+    /**
+     * Returns a cursor pointing to every entry in the Tweets collection that 
      * matches the criteria given as parameters.
      * 
-     * Available field options: ID, Text, UserID, UserName, created_at .
+     * Available field options: trends, as_of .
      * 
      * You can get every item calling the hasNext() method of the cursor.
      * 
@@ -268,10 +351,10 @@ public class dbAdapter {
     }
     
     /**
-     * Returns a cursor pointing to every entry in the Tweets collection that 
+     * Returns a cursor pointing to every entry in the Trends collection that 
      * matches the criteria given as parameters.
      * 
-     * Available field options: trends, as_of .
+     * Available field options: ID, Text, UserID, UserName, created_at .
      * 
      * You can get every item calling the hasNext() method of the cursor.
      * 
@@ -306,6 +389,51 @@ public class dbAdapter {
         BasicDBObject query = new BasicDBObject(field, value);
 
         DBCursor cursor = UsersColl.find(query);
+        return cursor;
+    }
+    
+    /**
+     * Returns a cursor pointing to every entry in the selectedUsers collection that 
+     * matches the criteria given as parameters.
+     * 
+     * Available field options: ID, UserName, Friends, Followers, Description, created_at .
+     * 
+     * You can get every item calling the hasNext() method of the cursor.
+     * 
+     * IMPORTANT: After you are done call cursor.close to close the connection.
+     * @param field
+     * @param value
+     * @return 
+     */
+    public DBCursor querySelectedUsers(String field, String value)
+    {
+        BasicDBObject query = new BasicDBObject(field, value);
+
+        DBCursor cursor = SelectedUsersColl.find(query);
+        return cursor;
+    }
+    
+     /**
+     * Returns a cursor pointing to every entry in the User<id> collection that 
+     * matches the criteria given as parameters.
+     * 
+     * Available field options: ID, Text, UserID, UserName, created_at .
+     * 
+     * You can get every item calling the hasNext() method of the cursor.
+     * 
+     * IMPORTANT: After you are done call cursor.close to close the connection.
+     * @param field
+     * @param value
+     * @return 
+     */
+    public DBCursor querySelectedUsers(String field, String value, int userID)
+    {
+        BasicDBObject query = new BasicDBObject(field, value);
+        
+        String collection = "User" + userID;
+        DBCollection dbColl = db.getCollection(collection);
+        
+        DBCursor cursor = dbColl.find(query);
         return cursor;
     }
 }
