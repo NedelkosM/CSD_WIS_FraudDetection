@@ -60,9 +60,11 @@ public class Choose40Users {
         int sum,sizeU = allUsers.size(), sizeTd = trendyTopics.size();
         DBCursor temp = dbAdapter.getInstance().getTweets();
         
-        for (int i=0; i<sizeU; i++){
+        for (int i=0; i<sizeU; i++)
+        {
             sum = 0;
-            for (int j=0; j<sizeTd; j++){
+            for (int j=0; j<sizeTd; j++)
+            {
                 while (temp.hasNext()){
                         DBObject object = temp.next();
                         DBTweet tweet = new DBTweet(object);
@@ -80,7 +82,44 @@ public class Choose40Users {
             frequenciesByUser.set(i, sum);
         }
         
+        
+        ArrayList <DBTrend> trends = new ArrayList<>();
+        ArrayList <DBUser> users = new ArrayList<>();
+        
+        //fill users from db
+        DBCursor cursor = dbAdapter.getInstance().getUsers();
+        while(cursor.hasNext())
+        {
+            users.add(new DBUser(cursor.next()));
+        }
+        cursor.close();
+        //fill trends from db
+        cursor = dbAdapter.getInstance().getTrends();
+        while(cursor.hasNext())
+        {
+            trends.add(new DBTrend(cursor.next()));
+        }
+        cursor.close();
+        //calculate frequencies for every user
+        while(temp.hasNext())
+        {
+            DBObject object = temp.next();
+            DBTweet tweet = new DBTweet(object);
+            for (DBUser user : users)
+            {
+                sum = 0;
+                for (DBTrend trend : trends)
+                {
+                    if (tweet.getText().contains(trend.getTrend()) && tweet.getUserID().equals(user.getID()))
+                    {
+                        sum++;
+                    }
+                }
+                frequenciesByUser.set(Integer.parseInt(user.getID()), sum);
+            }
+        }
         temp.close();
+        
     }
     
     

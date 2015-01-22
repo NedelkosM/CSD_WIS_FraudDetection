@@ -8,17 +8,17 @@ import com.mongodb.DBObject;
  */
 public class DBTrend {
     
-    private final String id;
+    private final String ID;
     private final String trend;
     
     public DBTrend (DBObject obj)
     {
-        this.id = obj.get("ID").toString();
+        this.ID = obj.get("ID").toString();
         this.trend = obj.get("Name").toString();
     }
 
-    public String getId() {
-        return id;
+    public String getID() {
+        return ID;
     }
 
     public String getTrend() {
