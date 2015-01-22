@@ -8,6 +8,9 @@ package twitterprojectwithoutmaven;
 
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
@@ -58,31 +61,7 @@ public class Choose40Users {
     public void findFrequencies(){
         
         int sum,sizeU = allUsers.size(), sizeTd = trendyTopics.size();
-        DBCursor temp = dbAdapter.getInstance().getTweets();
-        
-        for (int i=0; i<sizeU; i++)
-        {
-            sum = 0;
-            for (int j=0; j<sizeTd; j++)
-            {
-                while (temp.hasNext()){
-                        DBObject object = temp.next();
-                        DBTweet tweet = new DBTweet(object);
-                        
-                      /** Ο δεύτερος ελεγχος που θέλω να κανει μετα το && είναι αν χρηστης allUsers.get(i)
-                       * εχει κανει tweet στο trendyTopics.get(j)
-                        
-                       if (tweet.getText().contains(trendyTopics.get(j)) && ){
-                                    sum++;
-                                  
-                        }
-                      */
-                }
-            }
-            frequenciesByUser.set(i, sum);
-        }
-        
-        
+        DBCursor temp = dbAdapter.getInstance().getTweets();       
         ArrayList <DBTrend> trends = new ArrayList<>();
         ArrayList <DBUser> users = new ArrayList<>();
         
@@ -238,6 +217,51 @@ public class Choose40Users {
     
     }
     
+    /**
+     * write to file the results
+     */
+    public void writeToFile(){
+        
+        FileWriter fstream;
+        BufferedWriter outputFile = null;
+        
+        //open file
+        try{
+            fstream = new FileWriter("resultsPart3.txt",true); //true gia append
+            outputFile = new BufferedWriter(fstream);
+        }catch(IOException e){
+            System.err.println("You do not have write access to this file. \n");
+        }
+        
+        //write
+        try{
+            //write quartiles
+            outputFile.write("***QUARTILES*** \r\n");
+            for (int i=0; i<quartiles.size(); i++){
+                outputFile.write(quartiles.get(i).toString()+"\r\n");
+            }
+            //write uniqueFrequencies (istogramma)
+            outputFile.write("***UNIQUE FREQUENCIES*** \r\n");
+            int size = uniqueFrequencies.size();
+            for (int i=0; i<size; i++){
+                outputFile.write(uniqueFrequencies.get(i) + "\r\n");
+            }
+        }catch(IOException e){
+                System.err.println("Error writing to file. \r\n");
+        }
+        
+        //close file
+        if (outputFile != null){
+            try{
+                outputFile.close();            
+            }catch(IOException e){
+                 System.err.println("Error closing the file. \n");            
+            }
+        }
+    
+    
+    }
+    
      /**
      *get the 40 users
      * @return users40
@@ -278,6 +302,7 @@ public class Choose40Users {
         quartiles();
         find40Users();
         save40users();
+        writeToFile();
        
         return users40;
     }
