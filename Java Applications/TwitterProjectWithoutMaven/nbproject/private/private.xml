@@ -2,6 +2,13 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/home/efi/Projects/CSD_WIS_FraudDetection/Java%20Applications/TwitterProjectWithoutMaven/src/twitterprojectwithoutmaven/DBTweet.java</file>
+            <file>file:/home/efi/Projects/CSD_WIS_FraudDetection/Java%20Applications/TwitterProjectWithoutMaven/src/twitterprojectwithoutmaven/Choose40Users.java</file>
+            <file>file:/home/efi/Projects/CSD_WIS_FraudDetection/Java%20Applications/TwitterProjectWithoutMaven/src/twitterprojectwithoutmaven/DBUser.java</file>
+            <file>file:/home/efi/Projects/CSD_WIS_FraudDetection/Java%20Applications/TwitterProjectWithoutMaven/src/twitterprojectwithoutmaven/DBTrend.java</file>
+            <file>file:/home/efi/Projects/CSD_WIS_FraudDetection/Java%20Applications/TwitterProjectWithoutMaven/src/twitterprojectwithoutmaven/dbAdapter.java</file>
+            <file>file:/home/efi/Projects/CSD_WIS_FraudDetection/Java%20Applications/TwitterProjectWithoutMaven/src/twitterprojectwithoutmaven/Statistics.java</file>
+        </group>
     </open-files>
 </project-private>

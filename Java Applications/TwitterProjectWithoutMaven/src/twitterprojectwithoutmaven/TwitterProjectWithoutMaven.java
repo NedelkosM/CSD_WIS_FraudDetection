@@ -56,6 +56,10 @@ public class TwitterProjectWithoutMaven {
                     //stalker.addUser(USERID or twitter4j.User class);
                     stalker.initialize();
                     break;
+                case "Find Users":
+                    Choose40Users choose = new Choose40Users();
+                    choose.doTheJob();
+                    break;
                 default:
                     System.out.println(correct_usage);
                     break;

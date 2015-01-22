@@ -34,6 +34,8 @@ public class Choose40Users {
     public Choose40Users(){
        
         DBCursor temp;
+        allUsers = new ArrayList<>();
+        trendyTopics = new ArrayList<>();
         
         //take users
         temp = dbAdapter.getInstance().getUsers();
@@ -42,7 +44,7 @@ public class Choose40Users {
                 DBUser user = new DBUser(object);
                 allUsers.add(Integer.parseInt((user.getID())));  
         }
-        
+        temp.close();
         //take trendy topics
         temp = dbAdapter.getInstance().getTrends();
         while (temp.hasNext()){
