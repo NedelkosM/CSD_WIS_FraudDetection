@@ -106,7 +106,7 @@ public class Choose40Users {
                 
                 if (first_time)
                 {
-                  frequenciesByUser.add(0);
+                  frequenciesByUser.add(sum);
                 }
                 else
                 {
