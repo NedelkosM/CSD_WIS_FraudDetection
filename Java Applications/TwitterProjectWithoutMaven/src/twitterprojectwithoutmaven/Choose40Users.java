@@ -91,6 +91,7 @@ public class Choose40Users {
         {
             DBObject object = temp.next();
             DBTweet tweet = new DBTweet(object);
+            int i = 0;
             for (DBUser user : users)
             {
                 sum = 0;
@@ -101,7 +102,9 @@ public class Choose40Users {
                         sum++;
                     }
                 }
-                frequenciesByUser.add(Integer.parseInt(user.getID()), sum);
+                int user_sum = frequenciesByUser.get(i) + sum;
+                frequenciesByUser.set(i, user_sum);
+                i++;
             }
         }
         temp.close();
