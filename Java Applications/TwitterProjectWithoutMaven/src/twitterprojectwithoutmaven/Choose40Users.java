@@ -26,9 +26,10 @@ public class Choose40Users {
     private ArrayList<Integer>  frequenciesByUser;
     private ArrayList<Integer>  uniqueFrequencies;
     private ArrayList<Double> quartiles;
-    private ArrayList<String> users40;
+    private ArrayList<DBUser> users40;
     //4 clusters: C1 <=Q1, C2 >Q1 AND <=Q2, C3 >Q2 AND <=Q3, C4 >Q3 
-    private ArrayList<ArrayList<String>> clustersOfUsers; 
+    private ArrayList<ArrayList<DBUser>> clustersOfUsers; 
+    ArrayList <DBUser> users;
        
     
     public Choose40Users(){
@@ -70,7 +71,7 @@ public class Choose40Users {
         int sum,sizeU = allUsers.size(), sizeTd = trendyTopics.size();
         DBCursor temp = dbAdapter.getInstance().getTweets();       
         ArrayList <DBTrend> trends = new ArrayList<>();
-        ArrayList <DBUser> users = new ArrayList<>();
+        users = new ArrayList<>();
         
         //fill users from db
         DBCursor cursor = dbAdapter.getInstance().getUsers();
@@ -189,16 +190,16 @@ public class Choose40Users {
         for (int i=0; i<size; i++){
             int temp = frequenciesByUser.get(i);
             if (temp <= quartiles.get(0)){
-                clustersOfUsers.get(0).add(allUsers.get(i));
+                clustersOfUsers.get(0).add(users.get(i));
             }
             else if (temp > quartiles.get(0) && temp <= quartiles.get(1)){
-                 clustersOfUsers.get(1).add(allUsers.get(i));
+                 clustersOfUsers.get(1).add(users.get(i));
             }
             else if (temp > quartiles.get(1) && temp <= quartiles.get(2)){
-                 clustersOfUsers.get(2).add(allUsers.get(i));
+                 clustersOfUsers.get(2).add(users.get(i));
             }
             else{
-                 clustersOfUsers.get(3).add(allUsers.get(i));
+                 clustersOfUsers.get(3).add(users.get(i));
             }
         }
         
@@ -226,7 +227,7 @@ public class Choose40Users {
         DBCursor temp = null;
         
         for (int i=0; i<size; i++){
-            temp = dbAdapter.getInstance().queryUsers("ID", users40.get(i));
+            temp = dbAdapter.getInstance().queryUsers("ID", users40.get(i).getID());
             DBObject object = temp.next();
             DBUser user = new DBUser(object);
             temp.close();
@@ -284,7 +285,7 @@ public class Choose40Users {
      *get the 40 users
      * @return users40
      */
-    public ArrayList<String> qetUsers40(){
+    public ArrayList<DBUser> qetUsers40(){
         
         return users40;
     }
@@ -302,7 +303,7 @@ public class Choose40Users {
      *get the 4 clustersOfUsers
      * @return clustersOfUsers
      */
-    public ArrayList<ArrayList<String>> qetClusters(){
+    public ArrayList<ArrayList<DBUser>> qetClusters(){
         
         return clustersOfUsers;
     }
@@ -313,7 +314,7 @@ public class Choose40Users {
      *
      * @return users40
      */
-    public ArrayList<String> doTheJob(){
+    public ArrayList<DBUser> doTheJob(){
         
         findFrequencies();
         sortFrequencies();
