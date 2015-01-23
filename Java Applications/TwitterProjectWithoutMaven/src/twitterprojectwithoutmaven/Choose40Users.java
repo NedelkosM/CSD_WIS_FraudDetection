@@ -36,6 +36,11 @@ public class Choose40Users {
         DBCursor temp;
         allUsers = new ArrayList<>();
         trendyTopics = new ArrayList<>();
+        frequenciesByUser = new ArrayList<>();
+        uniqueFrequencies = new ArrayList<>();
+        quartiles = new ArrayList<>();
+        users40 = new ArrayList<>();
+        clustersOfUsers = new ArrayList<>();
         
         //take users
         temp = dbAdapter.getInstance().getUsers();
@@ -96,7 +101,7 @@ public class Choose40Users {
                         sum++;
                     }
                 }
-                frequenciesByUser.set(Integer.parseInt(user.getID()), sum);
+                frequenciesByUser.add(Integer.parseInt(user.getID()), sum);
             }
         }
         temp.close();
@@ -211,10 +216,9 @@ public class Choose40Users {
             temp = dbAdapter.getInstance().queryUsers("ID", users40.get(i));
             DBObject object = temp.next();
             DBUser user = new DBUser(object);
+            temp.close();
             dbAdapter.getInstance().insertStalkedUser(user);
         }
-        
-        temp.close();
     
     }
     

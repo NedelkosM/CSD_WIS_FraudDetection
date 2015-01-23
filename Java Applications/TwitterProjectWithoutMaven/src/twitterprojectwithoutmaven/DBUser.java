@@ -23,7 +23,14 @@ public class DBUser {
     public DBUser (DBObject obj)
     {
         this.ID = obj.get("ID").toString();
-        this.Description = obj.get("Description").toString();
+        if (obj.get("Description") != null)
+        {
+            this.Description = obj.get("Description").toString();
+        }
+        else
+        {
+            this.Description = "null";
+        }
         this.created_at = obj.get("created_at").toString();
         this.UserName = obj.get("UserName").toString();
         this.Friends = Integer.parseInt(obj.get("Friends").toString());
