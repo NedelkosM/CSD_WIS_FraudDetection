@@ -87,6 +87,7 @@ public class Choose40Users {
         }
         cursor.close();
         //calculate frequencies for every user
+        boolean first_time = true;
         while(temp.hasNext())
         {
             DBObject object = temp.next();
@@ -102,10 +103,19 @@ public class Choose40Users {
                         sum++;
                     }
                 }
-                int user_sum = frequenciesByUser.get(i) + sum;
-                frequenciesByUser.set(i, user_sum);
+                
+                if (first_time)
+                {
+                  frequenciesByUser.set(i, 0);
+                }
+                else
+                {
+                    int user_sum = frequenciesByUser.get(i) + sum;
+                    frequenciesByUser.set(i, user_sum);
+                }
                 i++;
             }
+            first_time = false;
         }
         temp.close();
         
