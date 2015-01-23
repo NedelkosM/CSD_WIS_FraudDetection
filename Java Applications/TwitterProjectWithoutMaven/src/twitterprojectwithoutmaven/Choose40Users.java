@@ -21,14 +21,14 @@ import java.util.Random;
  */
 public class Choose40Users {
     
-    private ArrayList<Integer> allUsers;
+    private ArrayList<String> allUsers;
     private ArrayList<Integer> trendyTopics;
     private ArrayList<Integer>  frequenciesByUser;
     private ArrayList<Integer>  uniqueFrequencies;
     private ArrayList<Double> quartiles;
-    private ArrayList<Integer> users40;
+    private ArrayList<String> users40;
     //4 clusters: C1 <=Q1, C2 >Q1 AND <=Q2, C3 >Q2 AND <=Q3, C4 >Q3 
-    private ArrayList<ArrayList<Integer>> clustersOfUsers; 
+    private ArrayList<ArrayList<String>> clustersOfUsers; 
        
     
     public Choose40Users(){
@@ -42,7 +42,7 @@ public class Choose40Users {
         while (temp.hasNext()){
                 DBObject object = temp.next();
                 DBUser user = new DBUser(object);
-                allUsers.add(Integer.parseInt((user.getID())));  
+                allUsers.add(user.getID());  
         }
         temp.close();
         //take trendy topics
@@ -208,8 +208,7 @@ public class Choose40Users {
         DBCursor temp = null;
         
         for (int i=0; i<size; i++){
-            String userToString = users40.get(i).toString();
-            temp = dbAdapter.getInstance().queryUsers("ID", userToString);
+            temp = dbAdapter.getInstance().queryUsers("ID", users40.get(i));
             DBObject object = temp.next();
             DBUser user = new DBUser(object);
             dbAdapter.getInstance().insertStalkedUser(user);
@@ -268,7 +267,7 @@ public class Choose40Users {
      *get the 40 users
      * @return users40
      */
-    public ArrayList<Integer> qetUsers40(){
+    public ArrayList<String> qetUsers40(){
         
         return users40;
     }
@@ -286,7 +285,7 @@ public class Choose40Users {
      *get the 4 clustersOfUsers
      * @return clustersOfUsers
      */
-    public ArrayList<ArrayList<Integer>> qetClusters(){
+    public ArrayList<ArrayList<String>> qetClusters(){
         
         return clustersOfUsers;
     }
@@ -297,7 +296,7 @@ public class Choose40Users {
      *
      * @return users40
      */
-    public ArrayList<Integer> doTheJob(){
+    public ArrayList<String> doTheJob(){
         
         findFrequencies();
         sortFrequencies();
