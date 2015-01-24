@@ -13,6 +13,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Random;
 
 /**
@@ -29,7 +30,7 @@ public class Choose40Users {
     private ArrayList<DBUser> users40;
     //4 clusters: C1 <=Q1, C2 >Q1 AND <=Q2, C3 >Q2 AND <=Q3, C4 >Q3 
     private ArrayList<ArrayList<DBUser>> clustersOfUsers; 
-    ArrayList <DBUser> users;
+    HashMap <String,DBUser> users;
        
     
     public Choose40Users(){
@@ -71,13 +72,15 @@ public class Choose40Users {
         int sum,sizeU = allUsers.size(), sizeTd = trendyTopics.size();
         DBCursor temp = dbAdapter.getInstance().getTweets();       
         ArrayList <DBTrend> trends = new ArrayList<>();
-        users = new ArrayList<>();
+        users = new HashMap<>();
         
         //fill users from db
+        DBUser temp_user;
         DBCursor cursor = dbAdapter.getInstance().getUsers();
         while(cursor.hasNext())
         {
-            users.add(new DBUser(cursor.next()));
+            temp_user = new DBUser(cursor.next());
+            users.put(temp_user.getID(), temp_user);
         }
         cursor.close();
         //fill trends from db
@@ -88,35 +91,20 @@ public class Choose40Users {
         }
         cursor.close();
         //calculate frequencies for every user
-        boolean first_time = true;
+        temp.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
+        DBTweet tweet = new DBTweet();
         while(temp.hasNext())
         {
-            DBObject object = temp.next();
-            DBTweet tweet = new DBTweet(object);
-            int i = 0;
-            for (DBUser user : users)
+            tweet.reset(temp.next());
+            sum = 0;
+            for (DBTrend trend : trends)
             {
-                sum = 0;
-                for (DBTrend trend : trends)
+                if (tweet.getText().contains(trend.getTrend()))
                 {
-                    if (tweet.getText().contains(trend.getTrend()) && tweet.getUserID().equals(user.getID()))
-                    {
-                        sum++;
-                    }
+                    sum++;
                 }
-                
-                if (first_time)
-                {
-                  frequenciesByUser.add(sum);
-                }
-                else
-                {
-                    int user_sum = frequenciesByUser.get(i) + sum;
-                    frequenciesByUser.set(i, user_sum);
-                }
-                i++;
             }
-            first_time = false;
+            users.get(tweet.getUserID()).addtoFrequency(sum);
         }
         temp.close();
         
@@ -187,19 +175,20 @@ public class Choose40Users {
         Random rand = new Random();
         
         //find users for each cluster
-        for (int i=0; i<size; i++){
-            int temp = frequenciesByUser.get(i);
-            if (temp <= quartiles.get(0)){
-                clustersOfUsers.get(0).add(users.get(i));
+        for (DBUser user : users.values())
+        {
+            int freq = user.getFrequency();
+            if (freq <= quartiles.get(0)){
+                clustersOfUsers.get(0).add(user);
             }
-            else if (temp > quartiles.get(0) && temp <= quartiles.get(1)){
-                 clustersOfUsers.get(1).add(users.get(i));
+            else if (freq > quartiles.get(0) && freq <= quartiles.get(1)){
+                 clustersOfUsers.get(1).add(user);
             }
-            else if (temp > quartiles.get(1) && temp <= quartiles.get(2)){
-                 clustersOfUsers.get(2).add(users.get(i));
+            else if (freq > quartiles.get(1) && freq <= quartiles.get(2)){
+                 clustersOfUsers.get(2).add(user);
             }
             else{
-                 clustersOfUsers.get(3).add(users.get(i));
+                 clustersOfUsers.get(3).add(user);
             }
         }
         

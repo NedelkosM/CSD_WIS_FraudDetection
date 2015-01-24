@@ -13,13 +13,27 @@ import com.mongodb.DBObject;
  */
 public class DBTweet {
     
-    private final String ID;
-    private final String Text;
-    private final String UserID;
-    private final String UserName;
-    private final String created_at;
+    private  String ID;
+    private  String Text;
+    private  String UserID;
+    private  String UserName;
+    private  String created_at;
+    
+    public DBTweet()
+    {
+        
+    }
     
     public DBTweet (DBObject obj)
+    {
+       this.ID = obj.get("ID").toString();
+       this.Text = obj.get("Text").toString();
+       this.UserID = obj.get("UserID").toString();
+       this.UserName = obj.get("UserName").toString();
+       this.created_at = obj.get("created_at").toString();
+    }
+    
+    public void reset(DBObject obj)
     {
        this.ID = obj.get("ID").toString();
        this.Text = obj.get("Text").toString();

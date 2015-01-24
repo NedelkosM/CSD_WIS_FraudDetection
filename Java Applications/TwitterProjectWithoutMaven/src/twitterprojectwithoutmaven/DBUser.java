@@ -19,6 +19,7 @@ public class DBUser {
     private final int Followers;
     private final String Description;
     private final String created_at;
+    private int frequency;
     
     public DBUser (DBObject obj)
     {
@@ -35,6 +36,7 @@ public class DBUser {
         this.UserName = obj.get("UserName").toString();
         this.Friends = Integer.parseInt(obj.get("Friends").toString());
         this.Followers = Integer.parseInt(obj.get("Followers").toString());
+        this.frequency = 0;
     }
 
     public String getID() {
@@ -59,6 +61,16 @@ public class DBUser {
 
     public String getCreated_at() {
         return created_at;
+    }
+    
+    public int getFrequency()
+    {
+        return this.frequency;
+    }
+    
+    public void addtoFrequency(int sum)
+    {
+        this.frequency += sum;
     }
     
     
