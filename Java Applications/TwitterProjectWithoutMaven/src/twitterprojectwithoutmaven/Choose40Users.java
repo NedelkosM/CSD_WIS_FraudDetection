@@ -93,6 +93,7 @@ public class Choose40Users {
         //calculate frequencies for every user
         temp.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
         DBTweet tweet = new DBTweet();
+        int count = 0;
         while(temp.hasNext())
         {
             tweet.reset(temp.next());
@@ -105,6 +106,11 @@ public class Choose40Users {
                 }
             }
             users.get(tweet.getUserID()).addtoFrequency(sum);
+            count++;
+            if (count % 10000 == 0)
+            {
+                System.out.println("Finished with 10000 tweets");
+            }
         }
         temp.close();
         
