@@ -5,6 +5,7 @@
  */
 package twitterprojectwithoutmaven;
 
+import com.mongodb.DBCursor;
 import java.io.File;
 import java.net.UnknownHostException;
 
@@ -53,7 +54,14 @@ public class TwitterProjectWithoutMaven {
                     tFunctions.UserAuth(args);
                     // Creates a stalker with a starting duration of 7 days
                     Stalker stalker = new Stalker(7);
-                    //stalker.addUser(USERID or twitter4j.User class);
+                    //add stalked users to stalker
+                    DBCursor cursor = dbAdapter.getInstance().getStalkedUsers();
+                    while(cursor.hasNext())
+                    {
+                        stalker.addUser(Long.parseLong(new DBUser(cursor.next()).getID()));
+                    }
+                    cursor.close();
+                    //start
                     stalker.initialize();
                     break;
                 case "Find Users":
