@@ -117,8 +117,11 @@ public class Choose40Users {
      */
     public void sortFrequencies(){
         
+        for(DBUser user : users.values())
+        {
+            frequenciesByUser.add(user.getFrequency());
+        }
         int size = frequenciesByUser.size();
-        
         //sort
         Collections.sort(frequenciesByUser);
         
