@@ -62,6 +62,8 @@ public class dbAdapter {
     public static dbAdapter getInstance() {
         return dbAdapterHolder.INSTANCE;
     }
+
+    
     
     private static class dbAdapterHolder {
 
@@ -205,6 +207,7 @@ public class dbAdapter {
         int id = 1;
         for(UserMentionEntity entity : status.getUserMentionEntities())
         {
+            
             list.add(new BasicDBObject(""+id, entity.toString()));
             id++;
         }
@@ -221,7 +224,7 @@ public class dbAdapter {
         id = 1;
         for(URLEntity entity : status.getURLEntities())
         {
-            list.add(new BasicDBObject(""+id, entity.toString()));
+            list.add(new BasicDBObject(""+id, entity.getExpandedURL().toString()));
             id++;
         }
         status_json.append("URLs", list);
@@ -293,6 +296,10 @@ public class dbAdapter {
         user_json.append("created_at", user.getCreated_at());
         
         this.SelectedUsersColl.insert(user_json,new WriteConcern(0, 0, false, false, true));
+    }
+    
+    public void insertUserStats(DBUserStat stat) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
     /**
