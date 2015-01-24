@@ -107,9 +107,9 @@ public class Choose40Users {
             }
             users.get(tweet.getUserID()).addtoFrequency(sum);
             count++;
-            if (count % 10000 == 0)
+            if (count % 100000 == 0)
             {
-                System.out.println("Finished with 10000 tweets");
+                System.out.println("Finished with 100000 tweets");
             }
         }
         temp.close();
@@ -133,7 +133,7 @@ public class Choose40Users {
         
         //delete the multiple and keep the unique frequencies
         for (int i=0; i<size; i++){
-            if (uniqueFrequencies.contains(frequenciesByUser.get(i))){
+            if (!uniqueFrequencies.contains(frequenciesByUser.get(i))){
                 uniqueFrequencies.add(frequenciesByUser.get(i));
             }
         }
@@ -183,6 +183,12 @@ public class Choose40Users {
         int size = frequenciesByUser.size();
         Random rand = new Random();
         
+        for (int i=0; i<4; i++)
+        {
+            ArrayList<DBUser> temp = new ArrayList<>();
+            this.clustersOfUsers.add(temp);
+        }
+        
         //find users for each cluster
         for (DBUser user : users.values())
         {
@@ -221,14 +227,8 @@ public class Choose40Users {
      */
     public void save40users(){
         
-        int size = users40.size();
-        DBCursor temp = null;
-        
-        for (int i=0; i<size; i++){
-            temp = dbAdapter.getInstance().queryUsers("ID", users40.get(i).getID());
-            DBObject object = temp.next();
-            DBUser user = new DBUser(object);
-            temp.close();
+        for (DBUser user : this.users40)
+        {
             dbAdapter.getInstance().insertStalkedUser(user);
         }
     
