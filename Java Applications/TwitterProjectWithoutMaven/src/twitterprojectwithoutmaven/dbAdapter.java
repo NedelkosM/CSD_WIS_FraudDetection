@@ -1,6 +1,7 @@
 package twitterprojectwithoutmaven;
 
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -13,10 +14,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.UnknownHostException;
 import java.util.Properties;
+import twitter4j.HashtagEntity;
 import twitter4j.Status;
 import twitter4j.Trend;
 import twitter4j.Trends;
+import twitter4j.URLEntity;
 import twitter4j.User;
+import twitter4j.UserMentionEntity;
 
 /**
  *
@@ -193,8 +197,38 @@ public class dbAdapter {
         status_json.append("UserID", status.getUser().getId());
         status_json.append("UserName", status.getUser().getName());
         status_json.append("created_at", status.getCreatedAt());
+        status_json.append("in_reply_to_screen_name", status.getInReplyToScreenName());
+        status_json.append("RetweetCount", status.getRetweetCount());
+        status_json.append("Retweeted", status.isRetweeted());
+        status_json.append("Source", status.getSource());
+        BasicDBList list = new BasicDBList();
+        int id = 1;
+        for(UserMentionEntity entity : status.getUserMentionEntities())
+        {
+            list.add(new BasicDBObject(""+id, entity.toString()));
+            id++;
+        }
+        status_json.append("Mentions", list);
+        list = new BasicDBList();
+        id = 1;
+        for(HashtagEntity entity : status.getHashtagEntities())
+        {
+            list.add(new BasicDBObject(""+id, entity.toString()));
+            id++;
+        }
+        status_json.append("Hashtags", list);    
+        list = new BasicDBList();
+        id = 1;
+        for(URLEntity entity : status.getURLEntities())
+        {
+            list.add(new BasicDBObject(""+id, entity.toString()));
+            id++;
+        }
+        status_json.append("URLs", list);
         
         String coll = "User" + status.getUser().getId();
+        
+        this.db.getCollection(coll).createIndex(new BasicDBObject("ID",1).append("unique", true).append("dropDups", true));
         this.db.getCollection(coll).insert(status_json,new WriteConcern(0, 0, false, false, true));
     }
     
