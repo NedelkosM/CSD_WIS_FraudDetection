@@ -5,8 +5,6 @@
  */
 package twitterprojectwithoutmaven;
 
-import java.util.Objects;
-
 /**
  *
  * @author Chris
@@ -40,7 +38,16 @@ class TweetDist {
         if ((this.tID1 == null ? td.tID2 == null : this.tID1.equals(td.tID2)) && this.tID2.equals(td.tID1)) {
             return true;
         }
+
         return false;
+    }
+
+    String getTweet2() {
+        return this.tID1;
+    }
+
+    String getTweet1() {
+        return this.tID2;
     }
 
 }

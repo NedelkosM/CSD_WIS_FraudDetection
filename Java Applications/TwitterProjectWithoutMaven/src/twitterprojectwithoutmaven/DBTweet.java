@@ -9,7 +9,6 @@ import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -113,7 +112,7 @@ public class DBTweet {
     String getLevText() {
         String t = this.getText();
         String toR = this.removeUrl(t);
-        toR = this.removeMentions(Text);
+        toR = this.removeMentions(toR);
 
         return toR;
     }
@@ -144,7 +143,30 @@ public class DBTweet {
     }
 
     public ArrayList<String> getURLS() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        BasicDBList list = ((BasicDBList) obj.get("URLs"));
+        ArrayList<String> toReturn = new ArrayList<>();
+
+        for (int i = 0; i < list.size(); i++) {
+            BasicDBObject o = (BasicDBObject) list.get(i);
+            String url = o.get("" + (i + 1)).toString();
+            url = getExpandedUrl(url);
+            toReturn.add(url);
+        }
+
+        return toReturn;
+
+    }
+
+    private String getExpandedUrl(String url) {
+
+        String[] split = url.split(", ");
+        String exteUrl = split[1].replaceAll("expandedURL=", "");
+        if (exteUrl.contains("'")) {
+            exteUrl = exteUrl.replace("'", "");
+        }
+        exteUrl = exteUrl.trim();
+
+        return exteUrl;
     }
 
 }

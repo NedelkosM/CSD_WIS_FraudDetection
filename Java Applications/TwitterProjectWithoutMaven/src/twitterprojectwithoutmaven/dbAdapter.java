@@ -298,7 +298,7 @@ public class dbAdapter {
         this.SelectedUsersColl.insert(user_json,new WriteConcern(0, 0, false, false, true));
     }
     
-    public void insertUserStats(DBUserStat stat) {
+    public void insertUserStats(BasicDBObject userStats) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

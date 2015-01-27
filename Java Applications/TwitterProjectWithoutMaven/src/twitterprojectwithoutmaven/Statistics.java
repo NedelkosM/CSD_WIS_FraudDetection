@@ -5,7 +5,6 @@
  */
 package twitterprojectwithoutmaven;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
 import java.util.ArrayList;
 
@@ -35,7 +34,7 @@ public class Statistics {
             //get user's tweets
             DBUserStat stat = new DBUserStat(user.getID());
 
-            dublist = new ArrayList<TweetDist>();
+            dublist = new ArrayList<>();
 
             //for each user's tweet
             DBCursor userTweets = dbAdapter.getInstance().queryTweets("UserID", user.getID());
@@ -71,14 +70,14 @@ public class Statistics {
 
             stat.CalculateStats();
 
-            dbAdapter.getInstance().insertUserStats(stat);
+            dbAdapter.getInstance().insertUserStats(stat.getDBObject());
         }
         users.close();
     }
 
     private void findDublicates(DBTweet tweet, String id) {
         //for each 
-        DBCursor tweets = dbAdapter.getInstance().queryTweets("UserId", id);
+        DBCursor tweets = dbAdapter.getInstance().queryTweets("UserID", id);
         int max = -1;
         while (tweets.hasNext()) {
             DBTweet tweet2 = (DBTweet) tweets.next();
