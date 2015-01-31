@@ -203,7 +203,7 @@ public class DBUserStat {
      */
     public void AddSources(String src) {
         if (Sources.containsKey(src)) {
-            Sources.replace(src, Sources.get(src) + 1);
+           // Sources.replace(src, Sources.get(src) + 1);
             return;
         }
         Sources.put(src, 1);

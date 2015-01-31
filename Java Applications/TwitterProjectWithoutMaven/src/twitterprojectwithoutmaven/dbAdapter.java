@@ -42,6 +42,7 @@ public class dbAdapter {
     private DBCollection UsersColl;
     private DBCollection TrendColl;
     private DBCollection SelectedUsersColl;
+    private DBCollection UserStats;
     private BasicDBObject status_json;
     private BasicDBObject trends_names;
     private BasicDBObject trends_json;
@@ -98,6 +99,7 @@ public class dbAdapter {
                 UsersColl = db.getCollection("users");
                 TrendColl = db.getCollection("trend");
                 SelectedUsersColl = db.getCollection("selectedUsers");
+                UserStats = db.getCollection("UserStats");
             }
         } catch (IOException ioe) {
             System.exit(-1);
@@ -298,8 +300,12 @@ public class dbAdapter {
         this.SelectedUsersColl.insert(user_json,new WriteConcern(0, 0, false, false, true));
     }
     
+    /**
+     * Inserts the user statistics in the BasicDBObject form they are
+     * @param userStats 
+     */
     public void insertUserStats(BasicDBObject userStats) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.UserStats.insert(userStats,new WriteConcern(0, 0, false, false, true));
     }
     
     /**
