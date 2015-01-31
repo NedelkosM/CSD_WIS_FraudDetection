@@ -5,27 +5,46 @@
  */
 package twitterprojectwithoutmaven;
 
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
  * @author efi
  */
 public class DBTweet {
-    
-    private final String ID;
-    private final String Text;
-    private final String UserID;
-    private final String UserName;
-    private final String created_at;
-    
-    public DBTweet (DBObject obj)
-    {
-       this.ID = obj.get("ID").toString();
-       this.Text = obj.get("Text").toString();
-       this.UserID = obj.get("UserID").toString();
-       this.UserName = obj.get("UserName").toString();
-       this.created_at = obj.get("created_at").toString();
+
+    private String ID;
+    private String Text;
+    private String UserID;
+    private String UserName;
+    private String created_at;
+    private DBObject obj;
+
+    public DBTweet() {
+
+    }
+
+    public DBTweet(DBObject obj) {
+        this.ID = obj.get("ID").toString();
+        this.Text = obj.get("Text").toString();
+        this.UserID = obj.get("UserID").toString();
+        this.UserName = obj.get("UserName").toString();
+        this.created_at = obj.get("created_at").toString();
+        this.obj = obj;
+    }
+
+    public void reset(DBObject obj) {
+        this.ID = obj.get("ID").toString();
+        this.Text = obj.get("Text").toString();
+        this.UserID = obj.get("UserID").toString();
+        this.UserName = obj.get("UserName").toString();
+        this.created_at = obj.get("created_at").toString();
+        this.obj = obj;
     }
 
     public String getID() {
@@ -49,31 +68,105 @@ public class DBTweet {
     }
 
     long getReTweets() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return Integer.getInteger(obj.get("RetweetCount").toString());
     }
 
     long isAReply() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        String s = (String) obj.get("in_reply_to_screen_name");
+        if (s != null) {
+            return 1;
+        }
+        return 0;
     }
-
 
     long getMentions() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return ((BasicDBList) obj.get("Mentions")).size();
     }
 
-    long isAreTweet() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    long isaReTweet() {
+        if (Boolean.getBoolean(obj.get("Retweeted").toString())) {
+            return 1;
+        }
+        return 0;
     }
 
-    long getHasTags() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    long getHashTags() {
+        return ((BasicDBList) obj.get("Hashtags")).size();
     }
 
     long getUrls() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return ((BasicDBList) obj.get("URLs")).size();
     }
 
     long isASimpleTweet() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (this.isaReTweet() + this.isAReply() > 0) {
+            return 0;
+        }
+        return 1;
     }
+
+    String getSource() {
+        return obj.get("Source").toString();
+    }
+
+    String getLevText() {
+        String t = this.getText();
+        String toR = this.removeUrl(t);
+        toR = this.removeMentions(toR);
+
+        return toR;
+    }
+
+    private String removeUrl(String commentstr) {
+        String urlPattern = "((https?|ftp|gopher|telnet|file|Unsure|http):((//)|(\\\\))+[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]*)";
+        Pattern p = Pattern.compile(urlPattern, Pattern.CASE_INSENSITIVE);
+        Matcher m = p.matcher(commentstr);
+        int i = 0;
+        while (m.find()) {
+            commentstr = commentstr.replaceAll(m.group(i), "").trim();
+            i++;
+        }
+        return commentstr;
+    }
+
+    private String removeMentions(String commentstr) {
+        String urlPattern = "@([^@ ]+)";
+        Pattern p = Pattern.compile(urlPattern, Pattern.CASE_INSENSITIVE);
+        Matcher m = p.matcher(commentstr);
+        int i = 0;
+        while (m.find()) {
+            commentstr = commentstr.replaceAll(m.group(i), "").trim();
+            i++;
+        }
+        return commentstr;
+
+    }
+
+    public ArrayList<String> getURLS() {
+        BasicDBList list = ((BasicDBList) obj.get("URLs"));
+        ArrayList<String> toReturn = new ArrayList<>();
+
+        for (int i = 0; i < list.size(); i++) {
+            BasicDBObject o = (BasicDBObject) list.get(i);
+            String url = o.get("" + (i + 1)).toString();
+            url = getExpandedUrl(url);
+            toReturn.add(url);
+        }
+
+        return toReturn;
+
+    }
+
+    private String getExpandedUrl(String url) {
+
+        String[] split = url.split(", ");
+        String exteUrl = split[1].replaceAll("expandedURL=", "");
+        if (exteUrl.contains("'")) {
+            exteUrl = exteUrl.replace("'", "");
+        }
+        exteUrl = exteUrl.trim();
+
+        return exteUrl;
+    }
+
 }

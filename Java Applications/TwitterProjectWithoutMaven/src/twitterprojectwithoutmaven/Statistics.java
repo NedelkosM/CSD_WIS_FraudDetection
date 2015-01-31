@@ -15,7 +15,7 @@ import java.util.ArrayList;
 public class Statistics {
 
     private ArrayList<TweetDist> list;
-    ArrayList<TweetDist> dublist;
+    private ArrayList<TweetDist> dublist;
 
     public Statistics() {
 
@@ -32,32 +32,33 @@ public class Statistics {
         while (users.hasNext()) {
             DBUser user = (DBUser) users.next();
             //get user's tweets
+            DBUserStat stat = new DBUserStat(user.getID());
 
-            long num_simple_tweets = 0;//number of user tweets
-            long num_reTweets = 0;//number of retweets
-            long num_replies = 0;//number of user's replies
-            long num_mentions = 0;//total user's mentions
-            long num_reTweets_recieved = 0;//total retweets user recieved
-            long num_hashTag = 0;// total number of hashTags
-            long num_Urls = 0;// total number of Ulrs contained at users tweets
-            dublist = new ArrayList<TweetDist>();
+            dublist = new ArrayList<>();
+
             //for each user's tweet
             DBCursor userTweets = dbAdapter.getInstance().queryTweets("UserID", user.getID());
+
             while (userTweets.hasNext()) {
+
                 DBTweet tweet = (DBTweet) userTweets.next();
-                num_simple_tweets += tweet.isASimpleTweet();
-                num_reTweets += tweet.getReTweets();
-                num_replies += tweet.isAReply();
-                num_mentions += tweet.getMentions();
-                num_reTweets_recieved += tweet.isAreTweet();
-                num_hashTag += tweet.getHasTags();
-                num_Urls += tweet.getUrls();
+
+                stat.setNum_simple_tweets(stat.getNum_simple_tweets() + tweet.isASimpleTweet());
+                stat.setNum_reTweets(stat.getNum_reTweets() + tweet.isaReTweet());
+                stat.setNum_replies(stat.getNum_replies() + tweet.isAReply());
+                stat.setNum_mentions(stat.getNum_mentions() + tweet.getMentions());
+                stat.setNum_reTweets_recieved(stat.getNum_reTweets_recieved() + tweet.getReTweets());
+                stat.setNum_hashTag(stat.getNum_hashTag() + tweet.getHashTags());
+                stat.setNum_Urls(stat.getNum_Urls() + tweet.getUrls());
+                stat.AddSources(tweet.getSource());
+                stat.AddUrls(tweet.getURLS());
 
                 if (tweet.isASimpleTweet() == 1) {
                     //if it's a imple tweet find the tweets tha are same to this.
                     if (list == null) {
                         list = new ArrayList<TweetDist>();
                     }
+
                     list.clear();
                     findDublicates(tweet, user.getID());
                 }
@@ -65,19 +66,24 @@ public class Statistics {
             }
             userTweets.close();
 
+            stat.setSameTweets(dublist);
+
+            stat.CalculateStats();
+
+            dbAdapter.getInstance().insertUserStats(stat.getDBObject());
         }
         users.close();
     }
 
     private void findDublicates(DBTweet tweet, String id) {
         //for each 
-        DBCursor tweets = dbAdapter.getInstance().queryTweets("UserId", id);
+        DBCursor tweets = dbAdapter.getInstance().queryTweets("UserID", id);
         int max = -1;
         while (tweets.hasNext()) {
             DBTweet tweet2 = (DBTweet) tweets.next();
             if (tweet.getID() == null ? tweet2.getID() != null : (!(tweet.getID().equals(tweet2.getID()) && tweet2.isASimpleTweet() == 1))) {
 
-                int dist = distance(tweet.getText(), tweet2.getText());
+                int dist = distance(tweet.getLevText(), tweet2.getLevText());
 
                 if (max < dist) {
                     max = dist;
@@ -120,7 +126,9 @@ public class Statistics {
             list1.normalize(max);
             TweetDist td = list1;
             if (td.getDist() >= 10) {
-                dublist.add(td);
+                if (!dublist.contains(td)) {
+                    dublist.add(td);
+                }
             }
         }
 
