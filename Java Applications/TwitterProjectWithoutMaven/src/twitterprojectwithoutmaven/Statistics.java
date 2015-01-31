@@ -5,7 +5,11 @@
  */
 package twitterprojectwithoutmaven;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -16,8 +20,10 @@ public class Statistics {
 
     private ArrayList<TweetDist> list;
     private ArrayList<TweetDist> dublist;
+    public boolean testMode=false;
 
-    public Statistics() {
+    public Statistics(boolean test) {
+        testMode=test;
 
     }
 
@@ -38,10 +44,19 @@ public class Statistics {
 
             //for each user's tweet
             DBCursor userTweets = dbAdapter.getInstance().queryTweets("UserID", user.getID());
-
+            int count=0;
             while (userTweets.hasNext()) {
 
+               
+                
                 DBTweet tweet = (DBTweet) userTweets.next();
+                count++;
+                if(testMode){
+                    
+                    if(count>=10){
+                        break;
+                    }
+                }
 
                 stat.setNum_simple_tweets(stat.getNum_simple_tweets() + tweet.isASimpleTweet());
                 stat.setNum_reTweets(stat.getNum_reTweets() + tweet.isaReTweet());
@@ -56,7 +71,7 @@ public class Statistics {
                 if (tweet.isASimpleTweet() == 1) {
                     //if it's a imple tweet find the tweets tha are same to this.
                     if (list == null) {
-                        list = new ArrayList<TweetDist>();
+                        list = new ArrayList<>();
                     }
 
                     list.clear();
@@ -69,8 +84,10 @@ public class Statistics {
             stat.setSameTweets(dublist);
 
             stat.CalculateStats();
-
-            dbAdapter.getInstance().insertUserStats(stat.getDBObject());
+            BasicDBObject dbObject = stat.getDBObject();
+            dbAdapter.getInstance().insertUserStats(dbObject);
+            this.writwUsertoFile(dbObject);
+            
         }
         users.close();
     }
@@ -134,4 +151,34 @@ public class Statistics {
 
     }
 
+    private void writwUsertoFile(BasicDBObject user){
+        FileWriter fstream;
+        BufferedWriter outputFile = null;
+        
+        //open file
+        try{
+            fstream = new FileWriter("resultsPart4.txt",true); //true gia append
+            outputFile = new BufferedWriter(fstream);
+        }catch(IOException e){
+            System.err.println("You do not have write access to this file. \n");
+        }
+        
+        //write
+        try{
+            //write quartiles
+            outputFile.write(user.toString()+"\r\n");
+            
+        }catch(IOException e){
+                System.err.println("Error writing to file. \r\n");
+        }
+        
+        //close file
+        if (outputFile != null){
+            try{
+                outputFile.close();            
+            }catch(IOException e){
+                 System.err.println("Error closing the file. \n");            
+            }
+        }
+    }
 }

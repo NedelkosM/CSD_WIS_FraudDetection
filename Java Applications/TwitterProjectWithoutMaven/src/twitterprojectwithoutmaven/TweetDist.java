@@ -9,7 +9,7 @@ package twitterprojectwithoutmaven;
  *
  * @author Chris
  */
-class TweetDist {
+public class TweetDist {
 
     private double dist;
     private final String tID1;

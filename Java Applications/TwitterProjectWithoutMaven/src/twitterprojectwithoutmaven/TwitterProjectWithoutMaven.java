@@ -31,6 +31,7 @@ public class TwitterProjectWithoutMaven {
      */
     public static void main(String[] args) throws UnknownHostException 
     {
+        /*
         String correct_usage = "Wrong input.Correct usage is: java -jar TwitterProjectWithoutMaven.jar <directory_name> <Miner/Stalker>";
 
         if (args.length > 1) {
@@ -80,6 +81,12 @@ public class TwitterProjectWithoutMaven {
         {
             System.out.println(correct_usage);
         }
+                */
+        
+        dbAdapter.getInstance().initialize();
+        Statistics st=new Statistics(true);
+        st.StatisticsB();
+        dbAdapter.getInstance().closeConnections();
     }
     
 }
