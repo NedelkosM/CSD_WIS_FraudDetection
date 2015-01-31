@@ -36,7 +36,7 @@ public class Statistics {
         //for each stalked user
         DBCursor users = dbAdapter.getInstance().getStalkedUsers();
         while (users.hasNext()) {
-            DBUser user = (DBUser) users.next();
+            DBUser user = new DBUser(users.next());
             //get user's tweets
             DBUserStat stat = new DBUserStat(user.getID());
 
