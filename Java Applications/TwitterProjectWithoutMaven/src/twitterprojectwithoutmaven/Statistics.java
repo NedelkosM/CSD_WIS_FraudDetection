@@ -7,10 +7,22 @@ package twitterprojectwithoutmaven;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
+import com.mongodb.DBObject;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 /**
  *
@@ -20,10 +32,17 @@ public class Statistics {
 
     private ArrayList<TweetDist> list;
     private ArrayList<TweetDist> dublist;
-    public boolean testMode=false;
+    public boolean testMode = false;
+    public int MaxTweets = 100;
+    private int lastrow = 0;
+    private final String fileName = "UserStats.xls";
+    private String sheet1Name = "allUsers";
+    private String sheet2Name = "Stalked users";
 
     public Statistics(boolean test) {
-        testMode=test;
+        testMode = test;
+        this.CreateFile();
+        this.writeStalkedUsertoFile(DBUserStat.header);
 
     }
 
@@ -35,27 +54,37 @@ public class Statistics {
     public void StatisticsB() {
         //for each stalked user
         DBCursor users = dbAdapter.getInstance().getStalkedUsers();
+        System.out.println("users: " + users.size());
         while (users.hasNext()) {
-            DBUser user = (DBUser) users.next();
+            DBObject obj = (DBObject) users.next();
+            DBUser user = new DBUser(obj);
             //get user's tweets
             DBUserStat stat = new DBUserStat(user.getID());
 
             dublist = new ArrayList<>();
 
             //for each user's tweet
-            DBCursor userTweets = dbAdapter.getInstance().queryTweets("UserID", user.getID());
-            int count=0;
+            DBCursor userTweets = dbAdapter.getInstance().getStalkedUserTweets(user.getID());
+            System.out.println("user: " + user.getID() + " tweets:" + userTweets.size());
+            int count = 0;
             while (userTweets.hasNext()) {
 
-               
-                
-                DBTweet tweet = (DBTweet) userTweets.next();
-                count++;
-                if(testMode){
+                DBObject next = userTweets.next();
+                DBTweet tweet = new DBTweet(next);
+
+                if (testMode) {
                     
-                    if(count>=10){
+                    //if(tweet.getUrls()>0){
+                        System.out.println("sText: "+tweet.getText());
+                        System.out.println("lText: "+tweet.getLevText());
+                        System.out.println();
+                    //}
+                    
+
+                    if (count >= MaxTweets) {
                         break;
                     }
+                    count++;
                 }
 
                 stat.setNum_simple_tweets(stat.getNum_simple_tweets() + tweet.isASimpleTweet());
@@ -86,18 +115,29 @@ public class Statistics {
             stat.CalculateStats();
             BasicDBObject dbObject = stat.getDBObject();
             dbAdapter.getInstance().insertUserStats(dbObject);
-            this.writwUsertoFile(dbObject);
-            
+            this.writeStalkedUsertoFile(stat.getExelRow());
+
         }
         users.close();
     }
 
     private void findDublicates(DBTweet tweet, String id) {
         //for each 
-        DBCursor tweets = dbAdapter.getInstance().queryTweets("UserID", id);
+        DBCursor tweets = dbAdapter.getInstance().getStalkedUserTweets(id);
         int max = -1;
+        int count = 0;
         while (tweets.hasNext()) {
-            DBTweet tweet2 = (DBTweet) tweets.next();
+
+            if (testMode) {
+                if (count >= 0) {
+                    break;
+                }
+                count++;
+            }
+
+            DBObject obj = tweets.next();
+
+            DBTweet tweet2 = new DBTweet(obj);
             if (tweet.getID() == null ? tweet2.getID() != null : (!(tweet.getID().equals(tweet2.getID()) && tweet2.isASimpleTweet() == 1))) {
 
                 int dist = distance(tweet.getLevText(), tweet2.getLevText());
@@ -142,7 +182,7 @@ public class Statistics {
         for (TweetDist list1 : list) {
             list1.normalize(max);
             TweetDist td = list1;
-            if (td.getDist() >= 10) {
+            if (td.getDist() <= 10) {
                 if (!dublist.contains(td)) {
                     dublist.add(td);
                 }
@@ -151,34 +191,82 @@ public class Statistics {
 
     }
 
-    private void writwUsertoFile(BasicDBObject user){
-        FileWriter fstream;
-        BufferedWriter outputFile = null;
-        
-        //open file
-        try{
-            fstream = new FileWriter("resultsPart4.txt",true); //true gia append
-            outputFile = new BufferedWriter(fstream);
-        }catch(IOException e){
-            System.err.println("You do not have write access to this file. \n");
+    private void CreateFile() {
+        try {
+            Workbook wb = new HSSFWorkbook();  // or new XSSFWorkbook();
+            Sheet sheet1 = wb.createSheet(sheet1Name);
+            Sheet sheet2 = wb.createSheet(sheet2Name);
+
+            FileOutputStream fileOut = null;
+            try {
+                fileOut = new FileOutputStream(fileName);
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(Statistics.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            wb.write(fileOut);
+
+        } catch (IOException ex) {
+            Logger.getLogger(Statistics.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        //write
-        try{
-            //write quartiles
-            outputFile.write(user.toString()+"\r\n");
-            
-        }catch(IOException e){
-                System.err.println("Error writing to file. \r\n");
+
+    }
+
+    private void writeStalkedUsertoFile(Object[] obj) {
+        InputStream inp = null;
+        try {
+            inp = new FileInputStream(fileName);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Statistics.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        //close file
-        if (outputFile != null){
-            try{
-                outputFile.close();            
-            }catch(IOException e){
-                 System.err.println("Error closing the file. \n");            
+
+        Workbook wb = null;
+        try {
+            wb = WorkbookFactory.create(inp);
+        } catch (IOException ex) {
+            Logger.getLogger(Statistics.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidFormatException ex) {
+            Logger.getLogger(Statistics.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        Sheet sheet = wb.getSheetAt(1);
+        Row row = sheet.getRow(lastrow);
+        if (row == null) {
+            row = sheet.createRow((short) lastrow++);
+        }
+        int col = 0;
+        for (Object o : obj) {
+
+            Cell cell = row.createCell(col);
+            col++;
+            if (o instanceof String) {
+                cell.setCellValue((String) o);
+            } else if (o instanceof Integer) {
+                cell.setCellValue((Integer) o);
+            } else if (o instanceof Double) {
+                cell.setCellValue((double) o);
+            } else if (o instanceof Long) {
+                cell.setCellValue((long) o);
+            } else {
+                cell.setCellValue((double) o);
             }
         }
+
+        FileOutputStream fileOut = null;
+        try {
+            fileOut = new FileOutputStream(fileName);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Statistics.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        try {
+            wb.write(fileOut);
+        } catch (IOException ex) {
+            Logger.getLogger(Statistics.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            fileOut.close();
+        } catch (IOException ex) {
+            Logger.getLogger(Statistics.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
+
 }

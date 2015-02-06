@@ -203,7 +203,7 @@ public class dbAdapter {
         status_json.append("created_at", status.getCreatedAt());
         status_json.append("in_reply_to_screen_name", status.getInReplyToScreenName());
         status_json.append("RetweetCount", status.getRetweetCount());
-        status_json.append("Retweeted", status.isRetweeted());
+        status_json.append("Retweeted", status.isRetweet());
         status_json.append("Source", status.getSource());
         BasicDBList list = new BasicDBList();
         int id = 1;
@@ -226,7 +226,7 @@ public class dbAdapter {
         id = 1;
         for(URLEntity entity : status.getURLEntities())
         {
-            list.add(new BasicDBObject(""+id, entity.getExpandedURL().toString()));
+            list.add(new BasicDBObject(""+id, entity.getExpandedURL()));
             id++;
         }
         status_json.append("URLs", list);
@@ -374,7 +374,7 @@ public class dbAdapter {
      * @param id
      * @return 
      */
-    public DBCursor getStalkedUserTweets(int id)
+    public DBCursor getStalkedUserTweets(String id)
     {
         String collection = "User"+id;
         DBCollection dbColl = db.getCollection(collection);

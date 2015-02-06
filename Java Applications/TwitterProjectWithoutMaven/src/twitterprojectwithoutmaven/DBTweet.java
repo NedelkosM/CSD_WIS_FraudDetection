@@ -36,6 +36,7 @@ public class DBTweet {
         this.UserName = obj.get("UserName").toString();
         this.created_at = obj.get("created_at").toString();
         this.obj = obj;
+
     }
 
     public void reset(DBObject obj) {
@@ -68,7 +69,12 @@ public class DBTweet {
     }
 
     long getReTweets() {
-        return Integer.getInteger(obj.get("RetweetCount").toString());
+        Integer k = Integer.getInteger(obj.get("RetweetCount").toString());
+
+        if (k == null) {
+            return 0;
+        }
+        return k;
     }
 
     long isAReply() {
@@ -85,6 +91,9 @@ public class DBTweet {
 
     long isaReTweet() {
         if (Boolean.getBoolean(obj.get("Retweeted").toString())) {
+            return 1;
+        }
+        if (Text.contains("RT ")) {
             return 1;
         }
         return 0;
@@ -129,16 +138,19 @@ public class DBTweet {
         return commentstr;
     }
 
-    private String removeMentions(String commentstr) {
-        String urlPattern = "@([^@ ]+)";
-        Pattern p = Pattern.compile(urlPattern, Pattern.CASE_INSENSITIVE);
-        Matcher m = p.matcher(commentstr);
-        int i = 0;
-        while (m.find()) {
-            commentstr = commentstr.replaceAll(m.group(i), "").trim();
-            i++;
+    private String removeMentions(String str) {
+        String[] split = str.split(" ");
+        String toReturn = "";
+        for (String s : split) {
+            if (s.length() > 1) {
+                if (!(s.charAt(0) == '@' && s.length() > 1)) {
+                    toReturn = toReturn + " " + s;
+                }
+            } else {
+                toReturn = toReturn + " " + s;
+            }
         }
-        return commentstr;
+        return toReturn.trim();
 
     }
 

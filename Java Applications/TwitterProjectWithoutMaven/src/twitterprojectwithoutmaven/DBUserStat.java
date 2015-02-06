@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,6 +23,26 @@ import java.util.logging.Logger;
  * @author Chris
  */
 public class DBUserStat {
+
+    public static Object[] header = new Object[]{
+        "UserID",
+        "Simple Tweets",
+        "User's Replies",
+        "User's Retweets",
+        "Retweets Recieved",
+        "Mentions",
+        "HashTags",
+        "Total Urls",
+        "Unique Urls",
+        "Unique Domains",
+        "Tweets Containing Url",
+        "Tweets Containing HashTag",
+        "Average HashTags",
+        "Average Retweets Recieved",
+        "HashTags %",
+        "Urls %",
+        "Similar Tweets",
+        "Similar Tweets %"};
 
     private long num_simple_tweets = 0;//number of user tweets
     private long num_reTweets = 0;//number of retweets
@@ -37,12 +58,12 @@ public class DBUserStat {
     private ArrayList<TweetDist> sameTweets;
     private final HashMap<String, Integer> Sources;
     private final HashSet<String> domains;
-    private HashSet<String> uniqueUrls;
+    private final HashSet<String> uniqueUrls;
 
     private String UserId;
 
     private double urlsPerCent;
-    private double hashatagPerCent;
+    private double hashTagPerCent;
     private double avgHashTags;
     private double avgRetweets;
     private double urls;
@@ -69,6 +90,31 @@ public class DBUserStat {
         uniqueUrls = new HashSet<>();
         sameTweets = new ArrayList<>();
         this.ReadDBObject(obj);
+    }
+
+    public Object[] getExelRow() {
+        Object[] row;
+        row = new Object[]{
+            this.getUserId(),
+            this.getNum_simple_tweets(),
+            this.getNum_replies(),
+            this.getNum_reTweets(),
+            this.getNum_reTweets_recieved(),
+            this.getNum_mentions(),
+            this.getNum_hashTag(),
+            this.getNum_Urls(),
+            this.getUniqueUrls(),
+            this.getDomains(),
+            this.getContainsUrl(),
+            this.getContainsHastag(),
+            this.getAvgHashTags(),
+            this.getAvgRetweets(),
+            this.getHashTagPerCent(),
+            this.getUrlsPerCent(),
+            this.sameTweets.size(),
+            this.getSimilarPerCent()
+        };
+        return row;
     }
 
     /**
@@ -177,13 +223,6 @@ public class DBUserStat {
     }
 
     /**
-     * @return the sameTweets
-     */
-    public ArrayList<TweetDist> getSameTweets() {
-        return sameTweets;
-    }
-
-    /**
      * @param sameTweets the sameTweets to set
      */
     public void setSameTweets(ArrayList<TweetDist> sameTweets) {
@@ -216,10 +255,10 @@ public class DBUserStat {
      */
     public void AddUrls(ArrayList<String> ur) {
 
-        for (int i = 0; i < ur.size(); i++) {
-            getUniqueUrls().add(ur.get(i));
-            String str = getDomain(ur.get(i));
-            getDomains().add(str);
+        for (String url : ur) {
+            uniqueUrls.add(url);
+            String str = getDomain(url);
+            domains.add(str);
         }
 
     }
@@ -228,12 +267,25 @@ public class DBUserStat {
      *
      */
     public void CalculateStats() {
-        setAvgRetweets(1.0 * this.getNum_reTweets_recieved() / this.getNum_simple_tweets());
-        setAvgHashTags(1.0 * this.getNum_hashTag() / this.getNum_simple_tweets());
-        setHashatagPerCent((1.0 * this.getContainsHastag() / this.getNum_simple_tweets()) * 100);
-        setUrlsPerCent((1.0 * this.getContainsUrl() / this.num_simple_tweets) * 100);
-        setUrls(1.0 * getUniqueUrls().size() / this.getNum_Urls());
-        setUniquedomains(1.0 * getDomains().size() / this.getNum_Urls());
+        if (this.getNum_simple_tweets() != 0) {
+            setAvgRetweets(1.0 * this.getNum_reTweets_recieved() / this.getNum_simple_tweets());
+            setAvgHashTags(1.0 * this.getNum_hashTag() / this.getNum_simple_tweets());
+            setHashTagPerCent((1.0 * this.getContainsHastag() / this.getNum_simple_tweets()) * 100);
+            setUrlsPerCent((1.0 * this.getContainsUrl() / this.getNum_simple_tweets()) * 100);
+        } else {
+            setAvgRetweets(0);
+            setAvgHashTags(0);
+            setHashTagPerCent(0);
+            setUrlsPerCent(0);
+        }
+
+        if (this.getNum_Urls() != 0) {
+            setUniquePerUrls(1.0 * getUniqueUrls() / this.getNum_Urls());
+            setUniquedomainsPerUrl(1.0 * getDomains() / this.getNum_Urls());
+        } else {
+            setUniquePerUrls(0);
+            setUniquedomainsPerUrl(0);
+        }
     }
 
     /**
@@ -245,10 +297,10 @@ public class DBUserStat {
         o.append("UserID", getUserId());
         o.append("avgRetweetsRecieved", getAvgRetweets());
         o.append("avgHashTags", this.getAvgHashTags());
-        o.append("hashTagPerCent", this.getHashatagPerCent());
+        o.append("hashTagPerCent", this.getHashTagPerCent());
         o.append("urlsPerCent", this.getUrlsPerCent());
-        o.append("uniqueUrlsPerCent", getUrls());
-        o.append("uniqueDomainsPerCent", this.getUniquedomains());
+        o.append("uniqueUrlsPerCent", getUniquePerUrl());
+        o.append("uniqueDomainsPerCent", this.getUniquedomainsPerUrl());
 
         o.append("simpleTweets", this.num_simple_tweets);
         o.append("userRetweets", this.num_reTweets);
@@ -258,7 +310,7 @@ public class DBUserStat {
 
         BasicDBList sourceList = new BasicDBList();
 
-        HashSet<String> keySet = (HashSet<String>) Sources.keySet();
+        Set<String> keySet = Sources.keySet();
         Iterator<String> iterator = keySet.iterator();
         while (iterator.hasNext()) {
             String str = iterator.next();
@@ -300,13 +352,13 @@ public class DBUserStat {
         setUserId((String) obj.get("UserID"));
         setAvgRetweets((double) obj.get("avgRetweetsRecived"));
         setAvgHashTags((double) obj.get("avgHashTags"));
-        setHashatagPerCent((double) obj.get("hashTagPerCent"));
+        setHashTagPerCent((double) obj.get("hashTagPerCent"));
 
         setUrlsPerCent((double) obj.get("urlsPerCent"));
 
-        setUrls((double) obj.get("uniqueUrlsPerCent"));
+        setUniquePerUrls((double) obj.get("uniqueUrlsPerCent"));
 
-        setUniquedomains((double) obj.get("uniqueDomainsPerCent"));
+        setUniquedomainsPerUrl((double) obj.get("uniqueDomainsPerCent"));
 
         this.num_simple_tweets = (long) obj.get("simpleTweets");
         this.num_reTweets = (long) obj.get("userRetweets");
@@ -376,22 +428,15 @@ public class DBUserStat {
     /**
      * @return the domains
      */
-    public HashSet<String> getDomains() {
-        return domains;
+    public int getDomains() {
+        return domains.size();
     }
 
     /**
      * @return the uniqueUrls
      */
-    public HashSet<String> getUniqueUrls() {
-        return uniqueUrls;
-    }
-
-    /**
-     * @param uniqueUrls the uniqueUrls to set
-     */
-    public void setUniqueUrls(HashSet<String> uniqueUrls) {
-        this.uniqueUrls = uniqueUrls;
+    public int getUniqueUrls() {
+        return uniqueUrls.size();
     }
 
     /**
@@ -425,15 +470,15 @@ public class DBUserStat {
     /**
      * @return the hashatagPerCent
      */
-    public double getHashatagPerCent() {
-        return hashatagPerCent;
+    public double getHashTagPerCent() {
+        return hashTagPerCent;
     }
 
     /**
      * @param hashatagPerCent the hashatagPerCent to set
      */
-    public void setHashatagPerCent(double hashatagPerCent) {
-        this.hashatagPerCent = hashatagPerCent;
+    public void setHashTagPerCent(double hashatagPerCent) {
+        this.hashTagPerCent = hashatagPerCent;
     }
 
     /**
@@ -467,31 +512,34 @@ public class DBUserStat {
     /**
      * @return the urls
      */
-    public double getUrls() {
+    public double getUniquePerUrl() {
         return urls;
     }
 
     /**
      * @param urls the urls to set
      */
-    public void setUrls(double urls) {
+    public void setUniquePerUrls(double urls) {
         this.urls = urls;
     }
 
     /**
      * @return the Uniquedomains
      */
-    public double getUniquedomains() {
-        return Uniquedomains;
+    public double getUniquedomainsPerUrl() {
+        return this.Uniquedomains;
     }
 
     /**
      * @param Uniquedomains the Uniquedomains to set
      */
-    public void setUniquedomains(double Uniquedomains) {
+    public void setUniquedomainsPerUrl(double Uniquedomains) {
         this.Uniquedomains = Uniquedomains;
     }
-    
-   
 
+    public double getSimilarPerCent() {
+        if(this.getNum_simple_tweets()==0) return 0;
+    
+        return (1.0*this.sameTweets.size()/this.getNum_simple_tweets())*100;
+    }
 }
