@@ -39,12 +39,16 @@ public class Statistics {
     private final String fileName = "UserStats.xls";
     private String sheet1Name = "allUsers";
     private String sheet2Name = "Stalked users";
+    private int start;
 
-    public Statistics(boolean test) {
+    public Statistics(boolean test, int startFrom) {
         testMode = test;
-        this.CreateFile();
-        this.writeStalkedUsertoFile(DBUserStat.header);
-
+        
+        this.start=startFrom;
+        if(start==0){
+            this.CreateFile();
+            this.writeStalkedUsertoFile(DBUserStat.header);
+        }
     }
 
     public void StatisticsA() {
@@ -56,6 +60,14 @@ public class Statistics {
         //for each stalked user
         DBCursor users = dbAdapter.getInstance().getStalkedUsers();
         System.out.println("users: " + users.size());
+       
+        int c=0;
+        while(c<start&&users.hasNext()){
+            users.next();
+            lastrow++;
+            c++;
+        }
+        
         while (users.hasNext()) {
             DBObject obj = (DBObject) users.next();
             DBUser user = new DBUser(obj);
