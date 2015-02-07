@@ -3,6 +3,7 @@ package twitterprojectwithoutmaven;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.Bytes;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
@@ -325,6 +326,7 @@ public class dbAdapter {
     public DBCursor getTrends()
     {
         DBCursor cursor = TrendColl.find();
+        cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
         return cursor;
     }
     
@@ -337,6 +339,7 @@ public class dbAdapter {
     public DBCursor getTweets()
     {
         DBCursor cursor = TweetsColl.find();
+        cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
         return cursor;
     }
     
@@ -349,6 +352,7 @@ public class dbAdapter {
     public DBCursor getUsers()
     {
         DBCursor cursor = UsersColl.find();
+        cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
         return cursor;
     }
     
@@ -362,6 +366,7 @@ public class dbAdapter {
     public DBCursor getStalkedUsers()
     {
         DBCursor cursor = SelectedUsersColl.find();
+        cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
         return cursor;
     }
     
@@ -379,6 +384,7 @@ public class dbAdapter {
         String collection = "User"+id;
         DBCollection dbColl = db.getCollection(collection);
         DBCursor cursor = dbColl.find();
+        cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
         return cursor;
     }
     
@@ -408,6 +414,7 @@ public class dbAdapter {
         BasicDBObject query = new BasicDBObject(field, value);
 
         DBCursor cursor = TrendColl.find(query);
+        cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
         return cursor;
     }
     
@@ -429,6 +436,7 @@ public class dbAdapter {
         BasicDBObject query = new BasicDBObject(field, value);
 
         DBCursor cursor = TweetsColl.find(query);
+        cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
         return cursor;
     }
     
@@ -450,6 +458,7 @@ public class dbAdapter {
         BasicDBObject query = new BasicDBObject(field, value);
 
         DBCursor cursor = UsersColl.find(query);
+        cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
         return cursor;
     }
     
@@ -471,6 +480,7 @@ public class dbAdapter {
         BasicDBObject query = new BasicDBObject(field, value);
 
         DBCursor cursor = SelectedUsersColl.find(query);
+        cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
         return cursor;
     }
     
@@ -495,6 +505,7 @@ public class dbAdapter {
         DBCollection dbColl = db.getCollection(collection);
         
         DBCursor cursor = dbColl.find(query);
+        cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
         return cursor;
     }
 }
