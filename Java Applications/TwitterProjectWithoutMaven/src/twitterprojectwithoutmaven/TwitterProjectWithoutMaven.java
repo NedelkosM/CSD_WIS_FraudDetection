@@ -70,7 +70,12 @@ public class TwitterProjectWithoutMaven {
                     break;
                 case "Statistics":
                     System.out.println("Running Statistics...");
-                    Statistics st=new Statistics(false);
+                    int num = 0;
+                    if (args.length > 1)
+                    {
+                        num =  Integer.parseInt(args[1]);
+                    }
+                    Statistics st=new Statistics(false, num);
                     st.StatisticsB();
                     break;
                 default:
