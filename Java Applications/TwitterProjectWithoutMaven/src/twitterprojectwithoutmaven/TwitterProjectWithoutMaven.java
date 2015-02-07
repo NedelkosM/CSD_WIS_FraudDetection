@@ -32,15 +32,14 @@ public class TwitterProjectWithoutMaven {
     public static void main(String[] args) throws UnknownHostException 
     {
         
-        String correct_usage = "Wrong input.Correct usage is: java -jar TwitterProjectWithoutMaven.jar <directory_name> <Miner/Stalker>";
+        String correct_usage = "Wrong input.Correct usage is: java -jar TwitterProjectWithoutMaven.jar <Miner/Stalker/Find Users/Statistics>";
 
-        if (args.length > 1) {
-            relPath = args[0];
+        if (args.length > 0) {
 
             //initialize dbAdapter
             dbAdapter.getInstance().initialize();
 
-            switch (args[1]) {
+            switch (args[0]) {
                 case "Miner":
                     // PHASE 1
                     File myfile = new File(relPath + File.separator + "temp.txt");
@@ -69,6 +68,11 @@ public class TwitterProjectWithoutMaven {
                     Choose40Users choose = new Choose40Users();
                     choose.doTheJob();
                     break;
+                case "Statistics":
+                    System.out.println("Running Statistics...");
+                    Statistics st=new Statistics(false);
+                    st.StatisticsB();
+                    break;
                 default:
                     System.out.println(correct_usage);
                     break;
@@ -81,12 +85,6 @@ public class TwitterProjectWithoutMaven {
         {
             System.out.println(correct_usage);
         }
-                
-        
-        dbAdapter.getInstance().initialize();
-        Statistics st=new Statistics(true);
-        st.StatisticsB();
-        dbAdapter.getInstance().closeConnections();
     }
     
 }
