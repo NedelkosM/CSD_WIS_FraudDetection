@@ -6,6 +6,7 @@
 package twitterprojectwithoutmaven;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.Bytes;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import java.io.FileInputStream;
@@ -54,6 +55,7 @@ public class Statistics {
     public void StatisticsB() {
         //for each stalked user
         DBCursor users = dbAdapter.getInstance().getStalkedUsers();
+        users.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
         System.out.println("users: " + users.size());
         while (users.hasNext()) {
             DBObject obj = (DBObject) users.next();
@@ -65,6 +67,7 @@ public class Statistics {
 
             //for each user's tweet
             DBCursor userTweets = dbAdapter.getInstance().getStalkedUserTweets(user.getID());
+            userTweets.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
             System.out.println("user: " + user.getID() + " tweets:" + userTweets.size());
             int count = 0;
             while (userTweets.hasNext()) {

@@ -120,10 +120,10 @@ public class DBTweet {
 
     String getLevText() {
         String t = this.getText();
-        String toR = this.removeUrl(t);
-        toR = this.removeMentions(toR);
-
-        return toR;
+        //String toR = this.removeUrl(t);
+        //toR = this.removeMentions(toR);
+        return removeMentions(this.getText());
+        //return toR;
     }
 
     private String removeUrl(String commentstr) {
