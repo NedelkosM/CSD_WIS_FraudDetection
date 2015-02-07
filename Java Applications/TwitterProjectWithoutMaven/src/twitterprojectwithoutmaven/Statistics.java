@@ -6,7 +6,6 @@
 package twitterprojectwithoutmaven;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.Bytes;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import java.io.FileInputStream;
@@ -39,12 +38,13 @@ public class Statistics {
     private final String fileName = "UserStats.xls";
     private String sheet1Name = "allUsers";
     private String sheet2Name = "Stalked users";
+    private final int number;
 
-    public Statistics(boolean test) {
+    public Statistics(boolean test, int num) {
         testMode = test;
         this.CreateFile();
         this.writeStalkedUsertoFile(DBUserStat.header);
-
+        this.number = num;
     }
 
     public void StatisticsA() {
