@@ -80,7 +80,7 @@ public class Statistics {
             //for each user's tweet
             DBCursor userTweets = dbAdapter.getInstance().getStalkedUserTweets(user.getID());
             System.out.println("user: " + user.getID() + " tweets:" + userTweets.size());
-            int count = 0;
+            int count = 0, count2=0;
             while (userTweets.hasNext()) {
 
                 DBObject next = userTweets.next();
@@ -118,9 +118,9 @@ public class Statistics {
                     }
 
                     list.clear();
-                    findDublicates(tweet, user.getID(),int c);
+                    findDublicates(tweet, user.getID(),count2);
                 }
-                c++;
+                count2++;
 
             }
             userTweets.close();
