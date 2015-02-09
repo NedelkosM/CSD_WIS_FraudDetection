@@ -24,7 +24,7 @@ import java.util.logging.Logger;
  */
 public class DBUserStat {
 
-    public static Object[] header = new Object[]{
+    public static Object[] header = new String[]{
         "UserID",
         "Simple Tweets",
         "User's Replies",
@@ -295,6 +295,13 @@ public class DBUserStat {
         }
     }
 
+    public void CalculateFromRead(){
+        this.setNum_hashTag((int) (this.getNum_simple_tweets()*this.getAvgHashTags()));
+        this.containsUrl=(int) (this.getNum_simple_tweets()*this.getUrlsPerCent());
+        
+        
+        
+    }
     /**
      *
      * @return
@@ -357,7 +364,7 @@ public class DBUserStat {
     private void ReadDBObject(DBObject obj) {
 
         setUserId((String) obj.get("UserID"));
-        setAvgRetweets((double) obj.get("avgRetweetsRecived"));
+        setAvgRetweets((double) obj.get("avgRetweetsRecieved"));
         setAvgHashTags((double) obj.get("avgHashTags"));
         setHashTagPerCent((double) obj.get("hashTagPerCent"));
 
@@ -436,13 +443,13 @@ public class DBUserStat {
      * @return the domains
      */
     public int getDomains() {
+        
         return domains.size();
     }
 
-    /**
-     * @return the uniqueUrls
-     */
+    
     public int getUniqueUrls() {
+       
         return uniqueUrls.size();
     }
 

@@ -305,17 +305,21 @@ public class Statistics {
             DBUserStat stat = new DBUserStat(next);
             ArrayList<String> s = stat.getSources();
             for (String str : s) {
+                
                 sources.add(str);
             }
 
         }
         cursor.close();
-
-        Object[] header = new Object[sources.size()];
+        
+        Object[] header = new Object[sources.size()+1];
         Iterator<String> iterator = sources.iterator();
-        int h = 0;
+        header[0]="User ID";
+        int h = 1;
         while (iterator.hasNext()) {
-            header[h] = iterator.next();
+
+            String[] split= iterator.next().split("\"");
+            header[h] = split[1];
             h++;
         }
         //header created
@@ -331,10 +335,14 @@ public class Statistics {
 
             DBUserStat stat = new DBUserStat(next);
             
-            Object[] row = new Object[sources.size()];
+            Object[] row = new Object[sources.size()+1];
+            
+            row[0]=stat.getUserId();
             //wite for each user a row with the number of tweets per source 
-            for (int i = 0; i < header.length; i++) {
-                row[i] = stat.getNumofTweetsofSource((String) header[i]);
+            int i=1;
+            for (String s: sources) {
+                row[i] = stat.getNumofTweetsofSource((String) s);
+                i++;
             }
             this.writeRow(name, sh, TheRow++, row);
            
