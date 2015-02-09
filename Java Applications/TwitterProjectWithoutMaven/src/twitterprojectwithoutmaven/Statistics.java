@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -117,8 +118,9 @@ public class Statistics {
                     }
 
                     list.clear();
-                    findDublicates(tweet, user.getID());
+                    findDublicates(tweet, user.getID(),int c);
                 }
+                c++;
 
             }
             userTweets.close();
@@ -134,7 +136,7 @@ public class Statistics {
         users.close();
     }
 
-    private void findDublicates(DBTweet tweet, String id) {
+    private void findDublicates(DBTweet tweet, String id,int c) {
         //for each 
         DBCursor tweets = dbAdapter.getInstance().getStalkedUserTweets(id);
         int max = -1;
@@ -142,11 +144,12 @@ public class Statistics {
         while (tweets.hasNext()) {
 
             if (testMode) {
-                if (count >= 0) {
+                
                     break;
-                }
-                count++;
+                
             }
+            if(count>=c) break;
+            
 
             DBObject obj = tweets.next();
 
@@ -162,7 +165,7 @@ public class Statistics {
                 list.add(new TweetDist(tweet.getID(), tweet2.getID(), dist));
 
             }
-
+            count++;
         }
         tweets.close();
         NormalizeAndCut(list, max);
@@ -282,4 +285,37 @@ public class Statistics {
         }
     }
 
+    private void Sources(){
+        /*DBCursor cursor= dbAdapter.getInstance().getAllStalkedUserStats();
+        HashSet<String> sources=new HashSet<String>();
+        
+        while(cursor.hasNext()){
+        DBObject next = cursor.next();
+        
+        DBUserStat stat=new DBUserStat(next);
+        ArrayList<String> s = stat.getSources();
+        for(String  str : s){
+        sources.add(str);
+        }
+        
+        }
+        cursor.close();
+        
+        cursor= dbAdapter.getInstance().getAllStalkedUserStats();
+        
+        
+        while(cursor.hasNext()){
+        DBObject next = cursor.next();
+        
+        DBUserStat stat=new DBUserStat(next);
+        ArrayList<String> s = stat.getSources();
+        for(String  str : s){
+        sources.add(str);
+        }
+        
+        }
+        cursor.close(); */
+        
+    
+    }
 }
