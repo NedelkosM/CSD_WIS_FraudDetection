@@ -322,7 +322,7 @@ public class Statistics {
         
         
         int TheRow=0;
-        this.writeRow(name, sh, TheRow, header);//wite header to file
+        this.writeRow(name, sh, TheRow++, header);//wite header to file
         cursor = dbAdapter.getInstance().getAllStalkedUserStats();
 
         while (cursor.hasNext()) {
@@ -330,11 +330,11 @@ public class Statistics {
             DBObject next = cursor.next();
 
             DBUserStat stat = new DBUserStat(next);
+            
             Object[] row = new Object[sources.size()];
             //wite for each user a row with the number of tweets per source 
             for (int i = 0; i < header.length; i++) {
                 row[i] = stat.getNumofTweetsofSource((String) header[i]);
-                i++;
             }
             this.writeRow(name, sh, TheRow++, row);
            
@@ -349,15 +349,13 @@ public class Statistics {
         
         int row=0;
         
-        this.writeRow(name, sh, row, DBUserStat.header);
+        this.writeRow(name, sh, row++, DBUserStat.header);
 
         while (cursor.hasNext()) {
             DBObject next = cursor.next();
-
             DBUserStat stat = new DBUserStat(next);
+            
             this.writeRow(name, sh, row++, stat.getExelRow());
-           
-
         }
         cursor.close();
     }
