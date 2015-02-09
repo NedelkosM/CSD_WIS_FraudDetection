@@ -235,6 +235,13 @@ public class DBUserStat {
     public ArrayList<String> getSources() {
         return new ArrayList(Sources.keySet());
     }
+    
+    public int getNumofTweetsofSource(String str){
+        if(Sources.containsKey(str)){
+            return Sources.get(str);
+        }
+        return 0;
+    }
 
     /**
      *

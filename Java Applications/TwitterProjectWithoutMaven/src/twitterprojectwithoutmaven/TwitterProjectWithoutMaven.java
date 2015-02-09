@@ -32,7 +32,7 @@ public class TwitterProjectWithoutMaven {
     public static void main(String[] args) throws UnknownHostException 
     {
         
-        String correct_usage = "Wrong input.Correct usage is: java -jar TwitterProjectWithoutMaven.jar <Miner/Stalker/Find Users/Statistics>";
+        String correct_usage = "Wrong input.Correct usage is: java -jar TwitterProjectWithoutMaven.jar <Miner/Stalker/Find Users/Statistics/ExtractXLS>";
 
         if (args.length > 0) {
 
@@ -77,6 +77,11 @@ public class TwitterProjectWithoutMaven {
                     }
                     Statistics st=new Statistics(false, num);
                     st.StatisticsB();
+                    break;
+                case "ExtractXLS":
+                    System.out.println("Running ExtractXLS...");
+                    Statistics st1=new Statistics(false, 0);
+                    st1.ExtractXLS("UserStats.xls");
                     break;
                 default:
                     System.out.println(correct_usage);

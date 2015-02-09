@@ -65,6 +65,12 @@ public class dbAdapter {
         return dbAdapterHolder.INSTANCE;
     }
 
+    DBCursor getAllStalkedUserStats() {
+        DBCursor cursor = UserStats.find();
+        cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
+        return cursor;
+    }
+
     
     
     private static class dbAdapterHolder {

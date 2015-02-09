@@ -6,7 +6,6 @@
 package twitterprojectwithoutmaven;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.Bytes;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import java.io.FileInputStream;
@@ -16,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -38,17 +38,18 @@ public class Statistics {
     public int MaxTweets = 100;
     private int lastrow = 0;
     private final String fileName = "UserStats.xls";
-    private String sheet1Name = "allUsers";
-    private String sheet2Name = "Stalked users";
+    private final String sheet1Name = "allUsers";
+    private final String sheet2Name = "Stalked users";
+    private final String sheet3Name = "Sources";
     private int start;
 
     public Statistics(boolean test, int startFrom) {
         testMode = test;
-        
-        this.start=startFrom;
-        if(start==0){
-            this.CreateFile();
-            this.writeStalkedUsertoFile(DBUserStat.header);
+
+        this.start = startFrom;
+        if (start == 0) {
+            this.CreateFile(fileName);
+            this.writeRow(fileName, 1, lastrow++, DBUserStat.header);
         }
     }
 
@@ -61,46 +62,44 @@ public class Statistics {
         //for each stalked user
         DBCursor users = dbAdapter.getInstance().getStalkedUsers();
         System.out.println("users: " + users.size());
-       
-        int c=0;
-        while(c<start&&users.hasNext()){
+
+        int c = 0;//userCounter
+        while (c < start && users.hasNext()) {
             users.next();
             lastrow++;
-            c++;
+            c++;//Start analyzing from start User (start 0:users.count)
         }
-        
+
         while (users.hasNext()) {
             DBObject obj = (DBObject) users.next();
-            DBUser user = new DBUser(obj);
+            DBUser user = new DBUser(obj);// Get User obj
             //get user's tweets
             DBUserStat stat = new DBUserStat(user.getID());
 
-            dublist = new ArrayList<>();
+            dublist = new ArrayList<>();// simmilar tweets per tweet
 
             //for each user's tweet
             DBCursor userTweets = dbAdapter.getInstance().getStalkedUserTweets(user.getID());
             System.out.println("user: " + user.getID() + " tweets:" + userTweets.size());
-            int count = 0, count2=0;
+            int count = 0, count2 = 0;// test Counter, and tweet counter
             while (userTweets.hasNext()) {
 
                 DBObject next = userTweets.next();
                 DBTweet tweet = new DBTweet(next);
 
                 if (testMode) {
-                    
                     //if(tweet.getUrls()>0){
-                        System.out.println("sText: "+tweet.getText());
-                        System.out.println("lText: "+tweet.getLevText());
-                        System.out.println();
+                    //System.out.println("sText: " + tweet.getText());
+                    //System.out.println("lText: " + tweet.getLevText());
+                    //System.out.println();
                     //}
-                    
 
                     if (count >= MaxTweets) {
                         break;
                     }
                     count++;
                 }
-
+                //make get data from the tweet and add it to userStats
                 stat.setNum_simple_tweets(stat.getNum_simple_tweets() + tweet.isASimpleTweet());
                 stat.setNum_reTweets(stat.getNum_reTweets() + tweet.isaReTweet());
                 stat.setNum_replies(stat.getNum_replies() + tweet.isAReply());
@@ -112,13 +111,13 @@ public class Statistics {
                 stat.AddUrls(tweet.getURLS());
 
                 if (tweet.isASimpleTweet() == 1) {
-                    //if it's a imple tweet find the tweets tha are same to this.
+                    //if it's a imple tweet find the tweets tha are similar to this.
                     if (list == null) {
                         list = new ArrayList<>();
                     }
 
                     list.clear();
-                    findDublicates(tweet, user.getID(),count2);
+                    findDublicates(tweet, user.getID(), count2);
                 }
                 count2++;
 
@@ -126,47 +125,51 @@ public class Statistics {
             userTweets.close();
 
             stat.setSameTweets(dublist);
-
             stat.CalculateStats();
+            
             BasicDBObject dbObject = stat.getDBObject();
             dbAdapter.getInstance().insertUserStats(dbObject);
-            this.writeStalkedUsertoFile(stat.getExelRow());
+            
+            this.writeRow(fileName, 1, lastrow++, stat.getExelRow());
 
         }
         users.close();
     }
 
-    private void findDublicates(DBTweet tweet, String id,int c) {
-        //for each 
+    private void findDublicates(DBTweet tweet, String id, int c) {
+        
+        if(testMode){
+            return;
+        }
+        
+        //for each  user's tweet
         DBCursor tweets = dbAdapter.getInstance().getStalkedUserTweets(id);
         int max = -1;
         int count = 0;
         while (tweets.hasNext()) {
 
-            if (testMode) {
-                
-                    break;
-                
+            if (count >= c) {
+                break;
             }
-            if(count>=c) break;
-            
 
             DBObject obj = tweets.next();
-
             DBTweet tweet2 = new DBTweet(obj);
+
             if (tweet.getID() == null ? tweet2.getID() != null : (!(tweet.getID().equals(tweet2.getID()) && tweet2.isASimpleTweet() == 1))) {
 
                 int dist = distance(tweet.getLevText(), tweet2.getLevText());
-
+                //distance bettwen tweets
                 if (max < dist) {
-                    max = dist;
+                    max = dist;//max distance
                 }
-
+                
                 list.add(new TweetDist(tweet.getID(), tweet2.getID(), dist));
 
             }
+
             count++;
         }
+
         tweets.close();
         NormalizeAndCut(list, max);
 
@@ -196,41 +199,45 @@ public class Statistics {
     private void NormalizeAndCut(ArrayList<TweetDist> list, int max) {
 
         for (TweetDist list1 : list) {
-            list1.normalize(max);
-            TweetDist td = list1;
-            if (td.getDist() <= 10) {
-                if (!dublist.contains(td)) {
-                    dublist.add(td);
+            list1.normalize(max);// based on max distance each distance forim this tweet is now %
+
+            if (list1.getDist() <= 10) {//get add to final list tweets that the distance between them is lower than 10/100
+                if (!dublist.contains(list1)) {
+                    dublist.add(list1);
                 }
             }
         }
 
     }
 
-    private void CreateFile() {
+    private void CreateFile(String name) {
         try {
             Workbook wb = new HSSFWorkbook();  // or new XSSFWorkbook();
-            Sheet sheet1 = wb.createSheet(sheet1Name);
+            Sheet sheet1 = wb.createSheet(sheet1Name);//create sheets
             Sheet sheet2 = wb.createSheet(sheet2Name);
+            Sheet sheet3 = wb.createSheet(sheet3Name);
 
             FileOutputStream fileOut = null;
             try {
-                fileOut = new FileOutputStream(fileName);
+                fileOut = new FileOutputStream(name); //save file
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(Statistics.class.getName()).log(Level.SEVERE, null, ex);
             }
             wb.write(fileOut);
+            wb.close();
 
         } catch (IOException ex) {
             Logger.getLogger(Statistics.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        
 
     }
 
-    private void writeStalkedUsertoFile(Object[] obj) {
+    private void writeRow(String name, int sh, int rowCounter, Object[] obj) {
         InputStream inp = null;
         try {
-            inp = new FileInputStream(fileName);
+            inp = new FileInputStream(name);//load file
         } catch (FileNotFoundException ex) {
             Logger.getLogger(Statistics.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -238,18 +245,20 @@ public class Statistics {
         Workbook wb = null;
         try {
             wb = WorkbookFactory.create(inp);
-        } catch (IOException ex) {
+        } catch (IOException | InvalidFormatException ex) {
             Logger.getLogger(Statistics.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidFormatException ex) {
-            Logger.getLogger(Statistics.class.getName()).log(Level.SEVERE, null, ex);
+            return;
         }
-        Sheet sheet = wb.getSheetAt(1);
-        Row row = sheet.getRow(lastrow);
+        Sheet sheet = wb.getSheetAt(sh);//load sheet
+        if (sheet == null) {
+            return;
+        }
+        Row row = sheet.getRow(rowCounter);//create row at line rowCounter
         if (row == null) {
-            row = sheet.createRow((short) lastrow++);
+            row = sheet.createRow((short) rowCounter);
         }
         int col = 0;
-        for (Object o : obj) {
+        for (Object o : obj) {//write row
 
             Cell cell = row.createCell(col);
             col++;
@@ -268,7 +277,7 @@ public class Statistics {
 
         FileOutputStream fileOut = null;
         try {
-            fileOut = new FileOutputStream(fileName);
+            fileOut = new FileOutputStream(name);//save file
         } catch (FileNotFoundException ex) {
             Logger.getLogger(Statistics.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -279,43 +288,83 @@ public class Statistics {
             Logger.getLogger(Statistics.class.getName()).log(Level.SEVERE, null, ex);
         }
         try {
-            fileOut.close();
+            fileOut.close();//close file
         } catch (IOException ex) {
             Logger.getLogger(Statistics.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    private void Sources(){
-        /*DBCursor cursor= dbAdapter.getInstance().getAllStalkedUserStats();
-        HashSet<String> sources=new HashSet<String>();
+    private void WriteSources(String name, int sh) {
         
-        while(cursor.hasNext()){
-        DBObject next = cursor.next();
-        
-        DBUserStat stat=new DBUserStat(next);
-        ArrayList<String> s = stat.getSources();
-        for(String  str : s){
-        sources.add(str);
-        }
-        
+        DBCursor cursor = dbAdapter.getInstance().getAllStalkedUserStats();
+        HashSet<String> sources = new HashSet<>();
+        //Get all unique  tweet's sources from all users
+        while (cursor.hasNext()) {
+            DBObject next = cursor.next();
+
+            DBUserStat stat = new DBUserStat(next);
+            ArrayList<String> s = stat.getSources();
+            for (String str : s) {
+                sources.add(str);
+            }
+
         }
         cursor.close();
-        
-        cursor= dbAdapter.getInstance().getAllStalkedUserStats();
-        
-        
-        while(cursor.hasNext()){
-        DBObject next = cursor.next();
-        
-        DBUserStat stat=new DBUserStat(next);
-        ArrayList<String> s = stat.getSources();
-        for(String  str : s){
-        sources.add(str);
+
+        Object[] header = new Object[sources.size()];
+        Iterator<String> iterator = sources.iterator();
+        int h = 0;
+        while (iterator.hasNext()) {
+            header[h] = iterator.next();
+            h++;
         }
+        //header created
         
+        
+        int TheRow=0;
+        this.writeRow(name, sh, TheRow, header);//wite header to file
+        cursor = dbAdapter.getInstance().getAllStalkedUserStats();
+
+        while (cursor.hasNext()) {
+
+            DBObject next = cursor.next();
+
+            DBUserStat stat = new DBUserStat(next);
+            Object[] row = new Object[sources.size()];
+            //wite for each user a row with the number of tweets per source 
+            for (int i = 0; i < header.length; i++) {
+                row[i] = stat.getNumofTweetsofSource((String) header[i]);
+                i++;
+            }
+            this.writeRow(name, sh, TheRow++, row);
+           
         }
-        cursor.close(); */
+        cursor.close();
+
+    }
+
+    private void WriteUserStats(String name, int sh) {
+        //write for alla stalked user their stats in a file
+        DBCursor cursor = dbAdapter.getInstance().getAllStalkedUserStats();
         
-    
+        int row=0;
+        
+        this.writeRow(name, sh, row, DBUserStat.header);
+
+        while (cursor.hasNext()) {
+            DBObject next = cursor.next();
+
+            DBUserStat stat = new DBUserStat(next);
+            this.writeRow(name, sh, row++, stat.getExelRow());
+           
+
+        }
+        cursor.close();
+    }
+
+    public void ExtractXLS(String name) {
+        this.CreateFile(name);
+        this.WriteUserStats(name, 1);
+        this.WriteSources(name, 2);
     }
 }
