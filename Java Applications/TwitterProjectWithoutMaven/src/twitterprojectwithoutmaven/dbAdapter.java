@@ -44,6 +44,7 @@ public class dbAdapter {
     private DBCollection TrendColl;
     private DBCollection SelectedUsersColl;
     private DBCollection UserStats;
+    private DBCollection Statistics;
     private BasicDBObject status_json;
     private BasicDBObject trends_names;
     private BasicDBObject trends_json;
@@ -65,13 +66,6 @@ public class dbAdapter {
         return dbAdapterHolder.INSTANCE;
     }
 
-    DBCursor getAllStalkedUserStats() {
-        DBCursor cursor = UserStats.find();
-        cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
-        return cursor;
-    }
-
-    
     
     private static class dbAdapterHolder {
 
@@ -107,6 +101,7 @@ public class dbAdapter {
                 TrendColl = db.getCollection("trend");
                 SelectedUsersColl = db.getCollection("selectedUsers");
                 UserStats = db.getCollection("UserStats");
+                Statistics = db.getCollection("Statistics");
             }
         } catch (IOException ioe) {
             System.exit(-1);
@@ -315,6 +310,12 @@ public class dbAdapter {
         this.UserStats.insert(userStats,new WriteConcern(0, 0, false, false, true));
     }
     
+   
+ 
+
+    void insertUserStats2(BasicDBObject userStats) {
+         this.Statistics.insert(userStats,new WriteConcern(0, 0, false, false, true));
+    }
     /**
      * 
      * 
@@ -372,6 +373,30 @@ public class dbAdapter {
     public DBCursor getStalkedUsers()
     {
         DBCursor cursor = SelectedUsersColl.find();
+        cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
+        return cursor;
+    }
+    
+    /**
+     * Returns a cursor pointing to every entry in the USerStats collection.
+     * You can get every item calling the hasNext() method of the cursor.
+     * IMPORTANT: After you are done call cursor.close to close the connection.
+     * @return 
+     */
+       public DBCursor getAllStalkedUserStats() {
+        DBCursor cursor = UserStats.find();
+        cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
+        return cursor;
+    }
+       
+       /**
+     * Returns a cursor pointing to every entry in the Statistics collection.
+     * You can get every item calling the hasNext() method of the cursor.
+     * IMPORTANT: After you are done call cursor.close to close the connection.
+     * @return 
+     */
+       public DBCursor getAllStatistics() {
+        DBCursor cursor = Statistics.find();
         cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
         return cursor;
     }

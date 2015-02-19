@@ -81,7 +81,7 @@ public class TwitterProjectWithoutMaven {
                 case "ExtractXLS":
                     System.out.println("Running ExtractXLS...");
                     Statistics st1=new Statistics(false, 0);
-                    st1.ExtractXLS("UserStats.xls");
+                    st1.ExtractXLS("Stats.xls");
                     break;
                 default:
                     System.out.println(correct_usage);

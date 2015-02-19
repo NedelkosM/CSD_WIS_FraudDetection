@@ -32,17 +32,31 @@ public class DBUserStat {
         "Retweets Recieved",
         "Mentions",
         "HashTags",
+        "Tweets Containing HashTag",
         "Total Urls",
         "Unique Urls",
         "Unique Domains",
         "Tweets Containing Url",
-        "Tweets Containing HashTag",
-        "Average HashTags",
-        "Average Retweets Recieved",
-        "HashTags %",
-        "Urls %",
-        "Similar Tweets",
-        "Similar Tweets %"};
+        "Similar Tweets"};
+    private static String User_ID="UserID";
+    private static String simple_Tweets="Simple Tweets";
+    private static String Users_retweets="Users's Retweets";
+    private static String replies="User's Replies";
+    private static String mentions="Mentions";
+    private static String retweets_Recieved="Retweets Recieved";
+    private static String total_Urls="Total Urls";
+    private static String hash_Tags="Hashtags";
+    private static String containing_HashTag="Tweets Containing Hashtags";
+    private static String unique_Urls="Unique Urls";
+    private static String unique_Domains="Unique Domains";
+    private static String similar_Tweets="SimilarTweets";
+    private static String sources_of_Tweets="Sources";
+    private static String contains_Url="Contains Url";
+    private static String Key="key";
+    private static String Value="value";
+    private static String Tweet1="tweet1";
+    private static String Tweet2="tweet2";
+    private static String Distance="distance";
 
     private long num_simple_tweets = 0;//number of user tweets
     private long num_reTweets = 0;//number of retweets
@@ -51,7 +65,8 @@ public class DBUserStat {
     private long num_reTweets_recieved = 0;//total retweets user recieved
     private long num_hashTag = 0;// total number of hashTags
     private long num_Urls = 0;// total number of Ulrs contained at users tweets
-
+    private int Unique_Urls=0;
+    private int Unique_domains=0;
     private long containsHastag = 0;
     private long containsUrl = 0;
 
@@ -62,12 +77,9 @@ public class DBUserStat {
 
     private String UserId;
 
-    private double urlsPerCent;
-    private double hashTagPerCent;
-    private double avgHashTags;
-    private double avgRetweets;
-    private double urls;
-    private double Uniquedomains;
+    
+    
+    
 
     DBUserStat(String id) {
         UserId = id;
@@ -89,9 +101,11 @@ public class DBUserStat {
         domains = new HashSet<>();
         uniqueUrls = new HashSet<>();
         sameTweets = new ArrayList<>();
-        this.ReadDBObject(obj);
+        this.ReadDBObject2(obj,true);
     }
-
+    
+    
+    
     public Object[] getExelRow() {
         Object[] row;
         row = new Object[]{
@@ -102,17 +116,12 @@ public class DBUserStat {
             this.getNum_reTweets_recieved(),
             this.getNum_mentions(),
             this.getNum_hashTag(),
+            this.getContainsHastag(),
             this.getNum_Urls(),
             this.getUniqueUrls(),
             this.getDomains(),
             this.getContainsUrl(),
-            this.getContainsHastag(),
-            this.getAvgHashTags(),
-            this.getAvgRetweets(),
-            this.getHashTagPerCent(),
-            this.getUrlsPerCent(),
-            this.sameTweets.size(),
-            this.getSimilarPerCent()
+            this.sameTweets.size()
         };
         return row;
     }
@@ -267,61 +276,40 @@ public class DBUserStat {
             String str = getDomain(url);
             domains.add(str);
         }
+        this.Unique_Urls=uniqueUrls.size();
+        this.Unique_domains=domains.size();
 
     }
 
-    /**
-     *
-     */
-    public void CalculateStats() {
-        if (this.getNum_simple_tweets() != 0) {
-            setAvgRetweets(1.0 * this.getNum_reTweets_recieved() / this.getNum_simple_tweets());
-            setAvgHashTags(1.0 * this.getNum_hashTag() / this.getNum_simple_tweets());
-            setHashTagPerCent((1.0 * this.getContainsHastag() / this.getNum_simple_tweets()) * 100);
-            setUrlsPerCent((1.0 * this.getContainsUrl() / this.getNum_simple_tweets()) * 100);
-        } else {
-            setAvgRetweets(0);
-            setAvgHashTags(0);
-            setHashTagPerCent(0);
-            setUrlsPerCent(0);
-        }
+   
 
-        if (this.getNum_Urls() != 0) {
-            setUniquePerUrls(1.0 * getUniqueUrls() / this.getNum_Urls());
-            setUniquedomainsPerUrl(1.0 * getDomains() / this.getNum_Urls());
-        } else {
-            setUniquePerUrls(0);
-            setUniquedomainsPerUrl(0);
-        }
-    }
+   
+   
 
-    public void CalculateFromRead(){
-        this.setNum_hashTag((int) (this.getNum_simple_tweets()*this.getAvgHashTags()));
-        this.containsUrl=(int) (this.getNum_simple_tweets()*this.getUrlsPerCent());
+    public BasicDBObject getDBObject2(){
         
-        
-        
-    }
-    /**
-     *
-     * @return
-     */
-    public BasicDBObject getDBObject() {
         BasicDBObject o = new BasicDBObject();
-        o.append("UserID", getUserId());
-        o.append("avgRetweetsRecieved", getAvgRetweets());
-        o.append("avgHashTags", this.getAvgHashTags());
-        o.append("hashTagPerCent", this.getHashTagPerCent());
-        o.append("urlsPerCent", this.getUrlsPerCent());
-        o.append("uniqueUrlsPerCent", getUniquePerUrl());
-        o.append("uniqueDomainsPerCent", this.getUniquedomainsPerUrl());
+        o.append(DBUserStat.User_ID, getUserId());
+        
 
-        o.append("simpleTweets", this.num_simple_tweets);
-        o.append("userRetweets", this.num_reTweets);
-        o.append("userReplies", this.num_replies);
-        o.append("userMentions", this.num_mentions);
-        o.append("retweetsRecieved", this.num_reTweets_recieved);
-
+        o.append(DBUserStat.simple_Tweets, this.num_simple_tweets);
+        
+        o.append(DBUserStat.Users_retweets, this.num_reTweets);
+        o.append(DBUserStat.replies, this.num_replies);
+        o.append(DBUserStat.mentions, this.num_mentions);
+        o.append(DBUserStat.retweets_Recieved, this.num_reTweets_recieved);
+        
+        o.append(DBUserStat.hash_Tags, this.num_hashTag);
+        o.append(DBUserStat.containing_HashTag, this.containsHastag);
+        
+        o.append(DBUserStat.total_Urls, this.num_Urls);
+        o.append(DBUserStat.unique_Domains, this.Unique_domains);
+        o.append(DBUserStat.unique_Urls, this.Unique_Urls);
+        o.append(DBUserStat.contains_Url, this.containsUrl);
+        
+        
+        
+        
         BasicDBList sourceList = new BasicDBList();
 
         Set<String> keySet = Sources.keySet();
@@ -331,12 +319,12 @@ public class DBUserStat {
             int value = Sources.get(str);
 
             BasicDBObject lo = new BasicDBObject();
-            lo.append("key", str);
-            lo.append("value", value);
+            lo.append(DBUserStat.Key, str);
+            lo.append(DBUserStat.Value, value);
             sourceList.add(lo);
         }
 
-        o.append("sourcesList", sourceList);
+        o.append(DBUserStat.sources_of_Tweets, sourceList);
 
         BasicDBList sameList = new BasicDBList();
 
@@ -348,52 +336,55 @@ public class DBUserStat {
             t2 = sameTweets.get(i).getTweet2();
             dist = (int) sameTweets.get(i).getDist();
 
-            t.append("tweet1", t1);
-            t.append("tweet2", t2);
-            t.append("distance", dist);
+            t.append(DBUserStat.Tweet1, t1);
+            t.append(DBUserStat.Tweet2, t2);
+            t.append(DBUserStat.Distance, dist);
 
             sameList.add(t);
         }
 
-        o.append("sameTweets", sameList);
-
+        o.append(DBUserStat.similar_Tweets, sameList);
         return o;
-
     }
+    
+   
+    
+    private void ReadDBObject2(DBObject obj,boolean b) {
+        
+        setUserId((String) obj.get(DBUserStat.User_ID));
+        
 
-    private void ReadDBObject(DBObject obj) {
-
-        setUserId((String) obj.get("UserID"));
-        setAvgRetweets((double) obj.get("avgRetweetsRecieved"));
-        setAvgHashTags((double) obj.get("avgHashTags"));
-        setHashTagPerCent((double) obj.get("hashTagPerCent"));
-
-        setUrlsPerCent((double) obj.get("urlsPerCent"));
-
-        setUniquePerUrls((double) obj.get("uniqueUrlsPerCent"));
-
-        setUniquedomainsPerUrl((double) obj.get("uniqueDomainsPerCent"));
-
-        this.num_simple_tweets = (long) obj.get("simpleTweets");
-        this.num_reTweets = (long) obj.get("userRetweets");
-        this.num_replies = (long) obj.get("userReplies");
-        this.num_mentions = (long) obj.get("userMentions");
-        this.num_reTweets_recieved = (long) obj.get("retweetsRecieved");
-
-        BasicDBList list = (BasicDBList) obj.get("sourcesList");
+        this.num_simple_tweets = (long) obj.get(DBUserStat.simple_Tweets);
+        this.num_reTweets = (long) obj.get(DBUserStat.Users_retweets);
+        this.num_replies = (long) obj.get(DBUserStat.replies);
+        this.num_mentions = (long) obj.get(DBUserStat.mentions);
+        this.num_reTweets_recieved = (long) obj.get(DBUserStat.retweets_Recieved);
+        
+        this.num_hashTag= (long) obj.get(DBUserStat.hash_Tags);
+        this.containsHastag= (long) obj.get(DBUserStat.containing_HashTag);
+        
+         this.num_Urls=(long) obj.get(DBUserStat.total_Urls);
+         this.Unique_domains=(int) obj.get(DBUserStat.unique_Domains);
+         this.Unique_Urls=(int) obj.get(DBUserStat.unique_Urls);
+         this.containsUrl=(long) obj.get(DBUserStat.contains_Url);
+         
+        
+       
+        
+        BasicDBList list = (BasicDBList) obj.get(DBUserStat.sources_of_Tweets);
         for (Object list1 : list) {
             BasicDBObject o = (BasicDBObject) list1;
-            String str = (String) o.get("key");
-            Integer value = (Integer) o.get("value");
+            String str = (String) o.get(DBUserStat.Key);
+            Integer value = (Integer) o.get(DBUserStat.Value);
             Sources.put(str, value);
         }
 
-        BasicDBList list2 = (BasicDBList) obj.get("sameTweets");
+        BasicDBList list2 = (BasicDBList) obj.get(DBUserStat.similar_Tweets);
         for (Object list1 : list2) {
             BasicDBObject o = (BasicDBObject) list1;
-            String str1 = (String) o.get("tweet1");
-            String str2 = (String) o.get("tweet2");
-            int dist = (int) o.get("distance");
+            String str1 = (String) o.get(DBUserStat.Tweet1);
+            String str2 = (String) o.get(DBUserStat.Tweet2);
+            int dist = (int) o.get(DBUserStat.Distance);
             TweetDist tweetDist = new TweetDist(str1, str2, dist);
             sameTweets.add(tweetDist);
         }
@@ -444,13 +435,13 @@ public class DBUserStat {
      */
     public int getDomains() {
         
-        return domains.size();
+        return this.Unique_domains;
     }
 
     
     public int getUniqueUrls() {
        
-        return uniqueUrls.size();
+        return this.Unique_Urls;
     }
 
     /**
@@ -467,93 +458,7 @@ public class DBUserStat {
         this.UserId = UserId;
     }
 
-    /**
-     * @return the urlsPerCent
-     */
-    public double getUrlsPerCent() {
-        return urlsPerCent;
-    }
-
-    /**
-     * @param urlsPerCent the urlsPerCent to set
-     */
-    public void setUrlsPerCent(double urlsPerCent) {
-        this.urlsPerCent = urlsPerCent;
-    }
-
-    /**
-     * @return the hashatagPerCent
-     */
-    public double getHashTagPerCent() {
-        return hashTagPerCent;
-    }
-
-    /**
-     * @param hashatagPerCent the hashatagPerCent to set
-     */
-    public void setHashTagPerCent(double hashatagPerCent) {
-        this.hashTagPerCent = hashatagPerCent;
-    }
-
-    /**
-     * @return the avgHashTags
-     */
-    public double getAvgHashTags() {
-        return avgHashTags;
-    }
-
-    /**
-     * @param avgHashTags the avgHashTags to set
-     */
-    public void setAvgHashTags(double avgHashTags) {
-        this.avgHashTags = avgHashTags;
-    }
-
-    /**
-     * @return the avgRetweets
-     */
-    public double getAvgRetweets() {
-        return avgRetweets;
-    }
-
-    /**
-     * @param avgRetweets the avgRetweets to set
-     */
-    public void setAvgRetweets(double avgRetweets) {
-        this.avgRetweets = avgRetweets;
-    }
-
-    /**
-     * @return the urls
-     */
-    public double getUniquePerUrl() {
-        return urls;
-    }
-
-    /**
-     * @param urls the urls to set
-     */
-    public void setUniquePerUrls(double urls) {
-        this.urls = urls;
-    }
-
-    /**
-     * @return the Uniquedomains
-     */
-    public double getUniquedomainsPerUrl() {
-        return this.Uniquedomains;
-    }
-
-    /**
-     * @param Uniquedomains the Uniquedomains to set
-     */
-    public void setUniquedomainsPerUrl(double Uniquedomains) {
-        this.Uniquedomains = Uniquedomains;
-    }
-
-    public double getSimilarPerCent() {
-        if(this.getNum_simple_tweets()==0) return 0;
     
-        return (1.0*this.sameTweets.size()/this.getNum_simple_tweets())*100;
-    }
+
+    
 }
