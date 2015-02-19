@@ -302,18 +302,12 @@ public class dbAdapter {
         this.SelectedUsersColl.insert(user_json,new WriteConcern(0, 0, false, false, true));
     }
     
-    /**
-     * Inserts the user statistics in the BasicDBObject form they are
-     * @param userStats 
-     */
-    public void insertUserStats(BasicDBObject userStats) {
-        this.UserStats.insert(userStats,new WriteConcern(0, 0, false, false, true));
-    }
+  
     
    
  
 
-    void insertUserStats2(BasicDBObject userStats) {
+    void insertUserStats(BasicDBObject userStats) {
          this.Statistics.insert(userStats,new WriteConcern(0, 0, false, false, true));
     }
     /**
@@ -377,17 +371,6 @@ public class dbAdapter {
         return cursor;
     }
     
-    /**
-     * Returns a cursor pointing to every entry in the USerStats collection.
-     * You can get every item calling the hasNext() method of the cursor.
-     * IMPORTANT: After you are done call cursor.close to close the connection.
-     * @return 
-     */
-       public DBCursor getAllStalkedUserStats() {
-        DBCursor cursor = UserStats.find();
-        cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
-        return cursor;
-    }
        
        /**
      * Returns a cursor pointing to every entry in the Statistics collection.
